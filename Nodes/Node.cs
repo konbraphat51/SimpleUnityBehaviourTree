@@ -2,15 +2,15 @@ using System.Collections.Generic;
 
 namespace BehaviorTree.Nodes
 {
-    public enum State
-    {
-        RUNNING,
-        SUCCESS,
-        FAILURE,
-    }
-
     public abstract class Node<Agent>
     {
+        public enum State
+        {
+            RUNNING,
+            SUCCESS,
+            FAILURE,
+        }
+
         public string name { get; private set; }
         protected List<Node<Agent>> _children = new List<Node<Agent>>();
         public IReadOnlyList<Node<Agent>> children
