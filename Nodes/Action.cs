@@ -4,5 +4,12 @@ namespace BehaviorTree.Nodes
     {
         public Action(string name)
             : base(name) { }
+
+        public override State Tick(Agent agent)
+        {
+            return TakeAction(agent) ? State.SUCCESS : State.RUNNING;
+        }
+
+        protected abstract bool TakeAction(Agent agent);
     }
 }
