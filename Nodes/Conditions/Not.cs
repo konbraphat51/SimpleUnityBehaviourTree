@@ -1,18 +1,18 @@
+using System.Collections.Generic;
+
 namespace BehaviorTree.Nodes
 {
-    public class Not<Agent> : ConditionEvaluator<Agent>
+    public class Not<Agent> : Logic<Agent>
     {
-        public ConditionEvaluator<Agent> condition;
-
         public Not(ConditionEvaluator<Agent> condition)
             : base("Not")
         {
-            this.condition = condition;
+            _children = new List<ConditionEvaluator<Agent>> { condition };
         }
 
         public override bool Evaluate(Agent agent)
         {
-            return !condition.Evaluate(agent);
+            return !_children[0].Evaluate(agent);
         }
     }
 }

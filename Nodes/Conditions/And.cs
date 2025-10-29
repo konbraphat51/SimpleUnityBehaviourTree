@@ -1,18 +1,18 @@
+using System.Linq;
+
 namespace BehaviorTree.Nodes
 {
-    public class And<Agent> : ConditionEvaluator<Agent>
+    public class And<Agent> : Logic<Agent>
     {
-        public ConditionEvaluator<Agent>[] conditions;
-
         public And(ConditionEvaluator<Agent>[] conditions)
             : base("And")
         {
-            this.conditions = conditions;
+            _children = conditions.ToList();
         }
 
         public override bool Evaluate(Agent agent)
         {
-            foreach (ConditionEvaluator<Agent> condition in conditions)
+            foreach (ConditionEvaluator<Agent> condition in _children)
             {
                 if (!condition.Evaluate(agent))
                 {
@@ -20,6 +20,11 @@ namespace BehaviorTree.Nodes
                 }
             }
             return true;
+        }
+
+        public void AddCondition(ConditionEvaluator<Agent> condition)
+        {
+            _children.Add(condition);
         }
     }
 }
