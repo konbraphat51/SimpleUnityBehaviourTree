@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace BehaviorTree.Nodes
 {
@@ -6,8 +7,11 @@ namespace BehaviorTree.Nodes
     {
         public int childCurrent { get; private set; } = -1;
 
-        public Sequence(string name)
-            : base(name) { }
+        public Sequence(string name, Node<Agent>[] children)
+            : base(name)
+        {
+            _children = children.ToList();
+        }
 
         public override State Tick(Agent agent)
         {
@@ -73,12 +77,12 @@ namespace BehaviorTree.Nodes
 
         public void AddChild(Node<Agent> child)
         {
-            children.Add(child);
+            _children.Add(child);
         }
 
         public void RemoveChild(Node<Agent> child)
         {
-            children.Remove(child);
+            _children.Remove(child);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace BehaviorTree.Nodes
             private set
             {
                 _childTrue = value;
-                children = new List<Node<Agent>> { _childTrue, _childFalse };
+                _children = new List<Node<Agent>> { _childTrue, _childFalse };
             }
         }
         private Node<Agent> _childFalse;
@@ -31,7 +31,7 @@ namespace BehaviorTree.Nodes
             private set
             {
                 _childFalse = value;
-                children = new List<Node<Agent>> { _childTrue, _childFalse };
+                _children = new List<Node<Agent>> { _childTrue, _childFalse };
             }
         }
 

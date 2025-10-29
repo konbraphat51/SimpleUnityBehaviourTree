@@ -12,7 +12,11 @@ namespace BehaviorTree.Nodes
     public abstract class Node<Agent>
     {
         public string name { get; private set; }
-        public List<Node<Agent>> children = new List<Node<Agent>>();
+        protected List<Node<Agent>> _children = new List<Node<Agent>>();
+        public IReadOnlyList<Node<Agent>> children
+        {
+            get { return _children.AsReadOnly(); }
+        }
 
         public Node(string name)
         {
