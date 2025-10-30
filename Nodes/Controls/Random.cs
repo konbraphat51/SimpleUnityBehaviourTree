@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using BehaviorTree.Serializations;
-using UnityEngine;
 
 namespace BehaviorTree.Nodes
 {
@@ -154,6 +154,7 @@ namespace BehaviorTree.Nodes
 
         protected Node<Agent>[] ShuffleChildrenByWeights()
         {
+            Random random = new Random();
             List<Node<Agent>> shuffled = new List<Node<Agent>>();
             List<Node<Agent>> childrenCopy = new List<Node<Agent>>(_children);
             List<float> weightsCopy = new List<float>(_weights);
@@ -165,7 +166,7 @@ namespace BehaviorTree.Nodes
                     totalWeight += weight;
                 }
 
-                float randomValue = Random.Range(0f, totalWeight);
+                float randomValue = ComputeRandom(totalWeight, random);
                 float cumulativeWeight = 0f;
                 for (int cnt = 0; cnt < childrenCopy.Count; cnt++)
                 {
@@ -180,6 +181,11 @@ namespace BehaviorTree.Nodes
                 }
             }
             return shuffled.ToArray();
+        }
+
+        private float ComputeRandom(float totalWeight, Random rand)
+        {
+            return (float)(rand.NextDouble() * totalWeight);
         }
     }
 }
