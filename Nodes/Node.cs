@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
 {
-    public abstract class Node<Agent>
+    public abstract class Node<Agent> : ISerializableBT
     {
         public enum State
         {

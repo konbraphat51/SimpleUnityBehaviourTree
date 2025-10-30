@@ -1,9 +1,17 @@
 using System.Linq;
+using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
 {
+    [SerializableNode("And")]
     public class And<Agent> : Logic<Agent>
     {
+        [ConstructorParameter("conditions")]
+        public ConditionEvaluator<Agent>[] conditionsArray
+        {
+            get { return _children.ToArray(); }
+        }
+
         public And(ConditionEvaluator<Agent>[] conditions)
             : base("And")
         {

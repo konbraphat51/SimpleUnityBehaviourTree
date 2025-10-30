@@ -1,6 +1,8 @@
+using BehaviorTree.Serializations;
+
 namespace BehaviorTree.Nodes
 {
-    public abstract class ConditionEvaluator<Agent>
+    public abstract class ConditionEvaluator<Agent> : ISerializableBT
     {
         public string name { get; private set; }
 

@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using System.IO;
+using BehaviorTree.Serializations;
 using UnityEngine;
 
 namespace BehaviorTree.Nodes
 {
+    [SerializableNode("Random")]
     public class Random<Agent> : Node<Agent>
     {
         public struct ChildWithWeight
@@ -30,6 +33,30 @@ namespace BehaviorTree.Nodes
                     );
                 }
                 return result.ToArray();
+            }
+        }
+
+        [ConstructorParameter("children")]
+        public Node<Agent>[] childrenArray
+        {
+            get { return _children.ToArray(); }
+        }
+
+        [ConstructorParameter("weights")]
+        public float[] weightsArray
+        {
+            get { return _weights.ToArray(); }
+        }
+
+        public Random(Node<Agent>[] children, float[] weights)
+            : base("Random")
+        {
+            _children.AddRange(children);
+            _weights.AddRange(weights);
+
+            if (_children.Count != _weights.Count)
+            {
+                throw new InvalidDataException("Number of children and weights must be the same.");
             }
         }
 

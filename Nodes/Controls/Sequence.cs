@@ -1,14 +1,22 @@
 using System;
 using System.Linq;
+using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
 {
+    [SerializableNode("Sequence")]
     public class Sequence<Agent> : Node<Agent>
     {
         public int childCurrent { get; private set; } = -1;
 
-        public Sequence(string name, Node<Agent>[] children)
-            : base(name)
+        [ConstructorParameter("children")]
+        public Node<Agent>[] childrenArray
+        {
+            get { return _children.ToArray(); }
+        }
+
+        public Sequence(Node<Agent>[] children)
+            : base("Sequence")
         {
             _children = children.ToList();
         }

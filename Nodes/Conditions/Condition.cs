@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
 {
+    [SerializableNode("Condition")]
     public class Condition<Agent> : Node<Agent>
     {
         public enum Evaluation
@@ -13,8 +15,11 @@ namespace BehaviorTree.Nodes
         }
 
         public Evaluation currentEvaluation { get; private set; } = Evaluation.NOT_YET;
+
+        [ConstructorParameter("evaluator")]
         public ConditionEvaluator<Agent> evaluator { get; private set; }
-        private Node<Agent> _childTrue;
+
+        [ConstructorParameter("childTrue")]
         public Node<Agent> childTrue
         {
             get { return _childTrue; }
@@ -24,7 +29,9 @@ namespace BehaviorTree.Nodes
                 _children = new List<Node<Agent>> { _childTrue, _childFalse };
             }
         }
-        private Node<Agent> _childFalse;
+        private Node<Agent> _childTrue;
+
+        [ConstructorParameter("childFalse")]
         public Node<Agent> childFalse
         {
             get { return _childFalse; }
@@ -34,11 +41,18 @@ namespace BehaviorTree.Nodes
                 _children = new List<Node<Agent>> { _childTrue, _childFalse };
             }
         }
+        private Node<Agent> _childFalse;
 
-        public Condition(ConditionEvaluator<Agent> evaluator)
+        public Condition(
+            ConditionEvaluator<Agent> evaluator,
+            Node<Agent> childTrue,
+            Node<Agent> childFalse
+        )
             : base(evaluator.name)
         {
             this.evaluator = evaluator;
+            this.childTrue = childTrue;
+            this.childFalse = childFalse;
         }
 
         public override State Tick(Agent agent)
