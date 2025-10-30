@@ -2,7 +2,7 @@ using System;
 
 namespace BehaviorTree.Serializations
 {
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Property)]
     public class ConstructorParameter : Attribute
     {
         public string parameterName { get; private set; }

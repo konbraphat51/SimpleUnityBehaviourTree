@@ -114,9 +114,9 @@ namespace BehaviorTree.Serializations
 
         private static void WriteConstructorParams(JsonWriter writer, ISerializableBT target)
         {
-            Tuple<string, FieldInfo>[] parameters = GetConstructorParameters(target);
+            Tuple<string, PropertyInfo>[] parameters = GetConstructorParameters(target);
 
-            foreach (Tuple<string, FieldInfo> param in parameters)
+            foreach (Tuple<string, PropertyInfo> param in parameters)
             {
                 // "paramName":
                 writer.WritePropertyName(param.Item1);
@@ -166,23 +166,28 @@ namespace BehaviorTree.Serializations
         /// <summary>
         /// Get all fields with `ConstructorParameter` attribute.
         /// </summary>
-        private static Tuple<string, FieldInfo>[] GetConstructorParameters(ISerializableBT target)
+        private static Tuple<string, PropertyInfo>[] GetConstructorParameters(
+            ISerializableBT target
+        )
         {
-            List<Tuple<string, FieldInfo>> result = new List<Tuple<string, FieldInfo>>();
+            List<Tuple<string, PropertyInfo>> result = new List<Tuple<string, PropertyInfo>>();
 
-            FieldInfo[] fields = target
+            PropertyInfo[] properties = target
                 .GetType()
-                .GetFields(
-                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly
+                .GetProperties(
+                    BindingFlags.NonPublic
+                        | BindingFlags.Public
+                        | BindingFlags.Instance
+                        | BindingFlags.DeclaredOnly
                 );
 
-            foreach (FieldInfo field in fields)
+            foreach (PropertyInfo prop in properties)
             {
-                object[] attrs = field.GetCustomAttributes(typeof(ConstructorParameter), false);
+                object[] attrs = prop.GetCustomAttributes(typeof(ConstructorParameter), false);
                 if (attrs.Length > 0)
                 {
                     ConstructorParameter parameterAttr = (ConstructorParameter)attrs[0];
-                    result.Add(new Tuple<string, FieldInfo>(parameterAttr.parameterName, field));
+                    result.Add(new Tuple<string, PropertyInfo>(parameterAttr.parameterName, prop));
                 }
             }
             return result.ToArray();
