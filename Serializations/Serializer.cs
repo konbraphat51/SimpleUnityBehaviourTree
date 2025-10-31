@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using BehaviorTree.Nodes;
 using Newtonsoft.Json;
@@ -13,7 +14,8 @@ namespace BehaviorTree.Serializations
     {
         public static string WriteNodeJson(Node<Agent> node)
         {
-            JsonWriter writer = new JsonTextWriter(new System.IO.StringWriter());
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter writer = new JsonTextWriter(stringWriter);
 
             // null guard
             if (node == null)
@@ -36,12 +38,13 @@ namespace BehaviorTree.Serializations
             // }
             writer.WriteEndObject();
 
-            return writer.ToString();
+            return stringWriter.ToString();
         }
 
         public static string WriteEvaluatorJson(ConditionEvaluator<Agent> evaluator)
         {
-            JsonWriter writer = new JsonTextWriter(new System.IO.StringWriter());
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter writer = new JsonTextWriter(stringWriter);
 
             // null guard
             if (evaluator == null)
@@ -64,7 +67,7 @@ namespace BehaviorTree.Serializations
             // }
             writer.WriteEndObject();
 
-            return writer.ToString();
+            return stringWriter.ToString();
         }
 
         private static void WriteParameters(
