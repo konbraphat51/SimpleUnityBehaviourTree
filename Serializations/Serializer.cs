@@ -27,10 +27,11 @@ namespace BehaviorTree.Serializations
 
             // "type": "TypeName",
             writer.WritePropertyName("type");
-            writer.WriteValue(GetTypeName(node));
+            string objectName = GetTypeName(node);
+            writer.WriteValue(objectName);
 
             // "params": { ... }
-            WriteParameters(writer, node);
+            WriteParameters(writer, node, objectName);
 
             // }
             writer.WriteEndObject();
@@ -54,10 +55,11 @@ namespace BehaviorTree.Serializations
 
             // "type": "TypeName",
             writer.WritePropertyName("type");
-            writer.WriteValue(GetTypeName(evaluator));
+            string objectName = GetTypeName(evaluator);
+            writer.WriteValue(objectName);
 
             // "params": { ... }
-            WriteParameters(writer, evaluator);
+            WriteParameters(writer, evaluator, objectName);
 
             // }
             writer.WriteEndObject();
@@ -65,14 +67,18 @@ namespace BehaviorTree.Serializations
             return writer.ToString();
         }
 
-        private static void WriteParameters(JsonWriter writer, ISerializableBT target)
+        private static void WriteParameters(
+            JsonWriter writer,
+            ISerializableBT target,
+            string objectName
+        )
         {
             // "params": {
             writer.WritePropertyName("params");
             writer.WriteStartObject();
 
             // ... constructor parameters ...
-            WriteConstructorParams(writer, target);
+            WriteConstructorParams(writer, target, objectName);
 
             // }
             writer.WriteEndObject();
@@ -112,7 +118,11 @@ namespace BehaviorTree.Serializations
             return serializableEvaluatorAttr.evaluatorTypeName;
         }
 
-        private static void WriteConstructorParams(JsonWriter writer, ISerializableBT target)
+        private static void WriteConstructorParams(
+            JsonWriter writer,
+            ISerializableBT target,
+            string objectName
+        )
         {
             Tuple<string, PropertyInfo>[] parameters = GetConstructorParameters(target);
 
@@ -122,11 +132,11 @@ namespace BehaviorTree.Serializations
                 writer.WritePropertyName(param.Item1);
 
                 // :paramValue
-                WriteValue(writer, param.Item2.GetValue(target));
+                WriteValue(writer, param.Item2.GetValue(target), objectName);
             }
         }
 
-        private static void WriteValue(JsonWriter writer, object value)
+        private static void WriteValue(JsonWriter writer, object value, string objectName)
         {
             // if array...
             if (value is System.Collections.IEnumerable && !(value is string))
@@ -134,18 +144,18 @@ namespace BehaviorTree.Serializations
                 writer.WriteStartArray();
                 foreach (object item in (System.Collections.IEnumerable)value)
                 {
-                    WriteSingleValue(writer, item);
+                    WriteSingleValue(writer, item, objectName);
                 }
                 writer.WriteEndArray();
             }
             // ... if single value...
             else
             {
-                WriteSingleValue(writer, value);
+                WriteSingleValue(writer, value, objectName);
             }
         }
 
-        private static void WriteSingleValue(JsonWriter writer, object value)
+        private static void WriteSingleValue(JsonWriter writer, object value, string objectName)
         {
             switch (value.GetType())
             {
@@ -158,7 +168,16 @@ namespace BehaviorTree.Serializations
                     writer.WriteRawValue(evaluationJson);
                     break;
                 default:
-                    writer.WriteValue(value);
+                    try
+                    {
+                        writer.WriteValue(value);
+                    }
+                    catch (JsonWriterException e)
+                    {
+                        throw new Exception(
+                            $"Failed to serialize value of type {value.GetType().Name} in {objectName}: {e.Message}"
+                        );
+                    }
                     break;
             }
         }
