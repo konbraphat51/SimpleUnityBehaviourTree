@@ -3,7 +3,7 @@ using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
 {
-    [SerializableNode("And")]
+    [SerializableEvaluator("And")]
     public class And<Agent> : Logic<Agent>
     {
         [ConstructorParameter("conditions")]

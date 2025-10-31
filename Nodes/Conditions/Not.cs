@@ -3,7 +3,7 @@ using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
 {
-    [SerializableNode("Not")]
+    [SerializableEvaluator("Not")]
     public class Not<Agent> : Logic<Agent>
     {
         [ConstructorParameter("condition")]
