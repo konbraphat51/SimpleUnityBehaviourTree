@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BehaviorTree.Sample
 {
-    public class SampleTreeRoot : MonoBehaviour
+    public class SerializationTester : MonoBehaviour
     {
         void Start()
         {
