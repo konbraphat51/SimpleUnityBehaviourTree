@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using BehaviorTree.Nodes;
@@ -144,53 +145,57 @@ namespace BehaviorTree.Serializations
         /// <summary>
         /// Find Node class has SerializableNode attribute matching the type name.
         /// </summary>
-        private static Type FindNodeByName(string typeName, string[] stacks = null)
+        private static Type FindNodeByName(string typeName, string[] stacks)
         {
-            Type nodeType = AppDomain
-                .CurrentDomain.GetAssemblies()
-                .SelectMany(assembly => assembly.GetTypes())
-                .FirstOrDefault(type =>
-                    type.IsSubclassOf(typeof(Node<Agent>))
-                    && type.GetCustomAttributes(typeof(SerializableNode), false)
-                        .Cast<SerializableNode>()
-                        .Any(attr => attr.nodeTypeName == typeName)
-                );
-
-            if (nodeType == null)
-            {
-                throw new DeserializationException(
-                    $"Cannot find Node class with SerializableNode attribute '{typeName}'",
-                    stacks
-                );
-            }
-
-            return nodeType;
+            return FindSerializableByName(typeof(SerializableNode), typeName, stacks);
         }
 
         /// <summary>
         /// Find Evaluator class has SerializableEvaluator attribute matching the type name.
         /// </summary>
-        private static Type FindEvaluatorByName(string typeName, string[] stacks = null)
+        private static Type FindEvaluatorByName(string typeName, string[] stacks)
         {
-            Type evaluatorType = AppDomain
-                .CurrentDomain.GetAssemblies()
-                .SelectMany(assembly => assembly.GetTypes())
-                .FirstOrDefault(type =>
-                    type.IsSubclassOf(typeof(ConditionEvaluator<Agent>))
-                    && type.GetCustomAttributes(typeof(SerializableEvaluator), false)
-                        .Cast<SerializableEvaluator>()
-                        .Any(attr => attr.evaluatorTypeName == typeName)
-                );
+            return FindSerializableByName(typeof(SerializableEvaluator), typeName, stacks);
+        }
 
-            if (evaluatorType == null)
+        private static Type FindSerializableByName(
+            Type typeAttribute,
+            string typeName,
+            string[] stacks
+        )
+        {
+            IEnumerable<Type> allTypes = AppDomain
+                .CurrentDomain.GetAssemblies()
+                .SelectMany(assembly => assembly.GetTypes());
+
+            // find types has targeted attribute
+            Type targetType = allTypes.FirstOrDefault(type =>
+                type.GetCustomAttributes(typeAttribute, false)
+                    .Cast<ISerializableAttribute>()
+                    .Any(attr => attr.typeName == typeName)
+            );
+
+            // null guard
+            if (targetType == null)
             {
                 throw new DeserializationException(
-                    $"Cannot find Evaluator class with SerializableEvaluator attribute '{typeName}'",
+                    $"Cannot find class with attribute '{typeAttribute.Name}' whose name is '{typeName}'.",
                     stacks
                 );
             }
 
-            return evaluatorType;
+            // if non-generic = Agent type defined in inheritance...
+            if (!targetType.IsGenericTypeDefinition)
+            {
+                // ... directly return
+                return targetType;
+            }
+            // if generic = Agent typing required...
+            else
+            {
+                // ... make generic type with Agent
+                return targetType.MakeGenericType(typeof(Agent));
+            }
         }
     }
 }
