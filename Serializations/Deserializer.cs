@@ -128,7 +128,7 @@ namespace BehaviorTree.Serializations
                 // array type
                 Type elementType = targetType.GetElementType();
                 JArray jArray = token.ToObject<JArray>();
-                object[] output = new object[jArray.Count];
+                Array outputArray = Array.CreateInstance(elementType, jArray.Count);
                 for (int cnt = 0; cnt < jArray.Count; cnt++)
                 {
                     object elementValue = ConvertJTokenToParameter(
@@ -136,9 +136,9 @@ namespace BehaviorTree.Serializations
                         elementType,
                         stacks
                     );
-                    output[cnt] = elementValue;
+                    outputArray.SetValue(elementValue, cnt);
                 }
-                return output;
+                return outputArray;
             }
             else if (typeof(Node<Agent>).IsAssignableFrom(targetType))
             {
