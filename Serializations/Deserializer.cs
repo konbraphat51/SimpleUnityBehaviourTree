@@ -123,13 +123,30 @@ namespace BehaviorTree.Serializations
             string[] stacks
         )
         {
-            if (targetType.IsSubclassOf(typeof(Node<Agent>)))
+            if (targetType.IsArray)
+            {
+                // array type
+                Type elementType = targetType.GetElementType();
+                JArray jArray = token.ToObject<JArray>();
+                object[] output = new object[jArray.Count];
+                for (int cnt = 0; cnt < jArray.Count; cnt++)
+                {
+                    object elementValue = ConvertJTokenToParameter(
+                        jArray[cnt],
+                        elementType,
+                        stacks
+                    );
+                    output[cnt] = elementValue;
+                }
+                return output;
+            }
+            else if (typeof(Node<Agent>).IsAssignableFrom(targetType))
             {
                 // nested Node
                 string childJson = token.ToString();
                 return ReadNodeJson(childJson, stacks);
             }
-            else if (targetType.IsSubclassOf(typeof(ConditionEvaluator<Agent>)))
+            else if (typeof(ConditionEvaluator<Agent>).IsAssignableFrom(targetType))
             {
                 // nested Evaluator
                 string evaluatorJson = token.ToString();
