@@ -159,11 +159,11 @@ namespace BehaviorTree.Serializations
         {
             switch (value.GetType())
             {
-                case Type t when t == typeof(Node<Agent>):
+                case Type t when typeof(Node<Agent>).IsAssignableFrom(t):
                     string childJson = WriteNodeJson((Node<Agent>)value);
                     writer.WriteRawValue(childJson);
                     break;
-                case Type t when t == typeof(ConditionEvaluator<Agent>):
+                case Type t when typeof(ConditionEvaluator<Agent>).IsAssignableFrom(t):
                     string evaluationJson = WriteEvaluatorJson((ConditionEvaluator<Agent>)value);
                     writer.WriteRawValue(evaluationJson);
                     break;
