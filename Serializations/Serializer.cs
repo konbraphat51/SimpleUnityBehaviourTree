@@ -175,7 +175,7 @@ namespace BehaviorTree.Serializations
                     catch (JsonWriterException e)
                     {
                         throw new Exception(
-                            $"Failed to serialize value of type {value.GetType().Name} in {objectName}: {e.Message}"
+                            $"Failed to serialize value of type \"{value.GetType().Name}\" in Node/Evaluator \"{objectName}\": {e.Message}"
                         );
                     }
                     break;
