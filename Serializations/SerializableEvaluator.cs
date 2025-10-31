@@ -3,13 +3,13 @@ using System;
 namespace BehaviorTree.Serializations
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class SerializableEvaluator : Attribute
+    public class SerializableEvaluator : Attribute, ISerializableAttribute
     {
-        public string evaluatorTypeName { get; private set; }
+        public string typeName { get; private set; }
 
         public SerializableEvaluator(string evaluatorTypeName)
         {
-            this.evaluatorTypeName = evaluatorTypeName;
+            this.typeName = evaluatorTypeName;
         }
     }
 }

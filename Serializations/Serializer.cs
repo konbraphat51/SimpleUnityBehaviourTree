@@ -100,7 +100,7 @@ namespace BehaviorTree.Serializations
                 );
             }
             SerializableNode serializableNodeAttr = (SerializableNode)attrs[0];
-            return serializableNodeAttr.nodeTypeName;
+            return serializableNodeAttr.typeName;
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace BehaviorTree.Serializations
                 );
             }
             SerializableEvaluator serializableEvaluatorAttr = (SerializableEvaluator)attrs[0];
-            return serializableEvaluatorAttr.evaluatorTypeName;
+            return serializableEvaluatorAttr.typeName;
         }
 
         private static void WriteConstructorParams(
