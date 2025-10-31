@@ -28,6 +28,10 @@ namespace BehaviorTree.Sample
 
             string serializedTree = Serializer<int>.WriteNodeJson(root);
             Debug.Log(serializedTree);
+            Node<int> deserializedTree = Deserializer<int>.ReadNodeJson(serializedTree);
+            string reserializedTree = Serializer<int>.WriteNodeJson(deserializedTree);
+            Debug.Log(reserializedTree);
+            Debug.Log(serializedTree == reserializedTree);
         }
     }
 }
