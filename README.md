@@ -187,6 +187,8 @@ Each node returns one of three states:
 
 ## Serialization
 
+For detailed JSON grammar specification, see [JSON_spec.md](JSON_spec.md).
+
 ### Saving a Behavior Tree
 
 ```csharp
