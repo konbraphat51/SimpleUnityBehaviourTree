@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>BehaviorTree</RootNamespace>
+    <AssemblyName>BehaviorTreeTest</AssemblyName>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../BehaviorTree.cs" />
+    <Compile Include="../Nodes/Node.cs" />
+    <Compile Include="../Nodes/Action.cs" />
+    <Compile Include="../Nodes/Controls/Sequence.cs" />
+    <Compile Include="../Nodes/Controls/Random.cs" />
+    <Compile Include="../Nodes/Conditions/Condition.cs" />
+    <Compile Include="../Nodes/Conditions/ConditionEvaluator.cs" />
+    <Compile Include="../Nodes/Conditions/And.cs" />
+    <Compile Include="../Nodes/Conditions/Or.cs" />
+    <Compile Include="../Nodes/Conditions/Not.cs" />
+    <Compile Include="../Nodes/Conditions/Logics.cs" />
+    <Compile Include="../Serializations/ISerializableBT.cs" />
+    <Compile Include="../Serializations/Attributes/ISerializableAttribute.cs" />
+    <Compile Include="../Serializations/Attributes/SerializableNode.cs" />
+    <Compile Include="../Serializations/Attributes/SerializableEvaluator.cs" />
+    <Compile Include="../Serializations/Attributes/ConstructorParameter.cs" />
+    <Compile Include="BehaviorTest.cs" />
+    <Compile Include="TestRunner.cs" />
+  </ItemGroup>
+
+</Project>
