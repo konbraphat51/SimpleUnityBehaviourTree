@@ -1,0 +1,28 @@
+# Build artifacts
+Testing/bin/
+Testing/obj/
+
+# .NET build artifacts
+*.dll
+*.exe
+*.pdb
+*.deps.json
+*.runtimeconfig.json
+
+# Unity files
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+Assets/AssetStoreTools*
+
+# Visual Studio cache directory
+.vs/
+
+# Rider
+.idea/
+
+# Uncommon Unity-related files
+sysinfo.txt
+*.stackdump
