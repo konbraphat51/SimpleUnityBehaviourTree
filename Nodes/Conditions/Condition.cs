@@ -11,9 +11,10 @@ namespace BehaviorTree.Nodes
         {
             TRUE,
             FALSE,
+            NOT_YET,
         }
 
-        public Evaluation currentEvaluation { get; private set; } = Evaluation.FALSE;
+        public Evaluation currentEvaluation { get; private set; } = Evaluation.NOT_YET;
 
         [ConstructorParameter("evaluator")]
         public ConditionEvaluator<Agent> evaluator { get; private set; }
@@ -60,14 +61,14 @@ namespace BehaviorTree.Nodes
             bool evaluation = evaluator.Evaluate(agent);
             Evaluation newEvaluation = evaluation ? Evaluation.TRUE : Evaluation.FALSE;
 
-            // If evaluation changed, reset the previous child
-            if (currentEvaluation != newEvaluation)
+            // If evaluation changed, reset all children
+            if (currentEvaluation != Evaluation.NOT_YET && currentEvaluation != newEvaluation)
             {
-                if (currentEvaluation == Evaluation.TRUE && childTrue != null)
+                if (childTrue != null)
                 {
                     childTrue.Reset();
                 }
-                else if (currentEvaluation == Evaluation.FALSE && childFalse != null)
+                if (childFalse != null)
                 {
                     childFalse.Reset();
                 }
@@ -104,7 +105,7 @@ namespace BehaviorTree.Nodes
         {
             base.Reset();
 
-            currentEvaluation = Evaluation.FALSE;
+            currentEvaluation = Evaluation.NOT_YET;
         }
 
         private State RunNode(Node<Agent> node, Agent agent)
