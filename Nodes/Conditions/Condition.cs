@@ -57,13 +57,24 @@ namespace BehaviorTree.Nodes
 
         public override State Tick(Agent agent)
         {
-            // if not evaluated yet...
-            if (currentEvaluation == Evaluation.NOT_YET)
+            // Re-evaluate condition every frame
+            bool evaluation = evaluator.Evaluate(agent);
+            Evaluation newEvaluation = evaluation ? Evaluation.TRUE : Evaluation.FALSE;
+
+            // If evaluation changed, reset all children
+            if (currentEvaluation != Evaluation.NOT_YET && currentEvaluation != newEvaluation)
             {
-                // ...evaluate condition
-                bool evaluation = evaluator.Evaluate(agent);
-                currentEvaluation = evaluation ? Evaluation.TRUE : Evaluation.FALSE;
+                if (childTrue != null)
+                {
+                    childTrue.Reset();
+                }
+                if (childFalse != null)
+                {
+                    childFalse.Reset();
+                }
             }
+
+            currentEvaluation = newEvaluation;
 
             State result;
             switch (currentEvaluation)
