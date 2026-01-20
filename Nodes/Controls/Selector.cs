@@ -23,13 +23,19 @@ namespace BehaviorTree.Nodes
         public override TAction Tick(TSensory input)
         {
             // try nodes from the beginning of the list in order each tick
-            // execute the first child that can run
-            if (children.Count > 0)
+            // execute the first one that returns a non-default result
+            for (int i = 0; i < children.Count; i++)
             {
-                return children[0].Tick(input);
+                TAction result = children[i].Tick(input);
+                
+                // If this child returns a non-default result, use it
+                if (!result.Equals(default(TAction)))
+                {
+                    return result;
+                }
             }
 
-            // if no children, return default
+            // if all children returned default or no children exist
             return default(TAction);
         }
     }
