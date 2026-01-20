@@ -38,48 +38,57 @@ namespace BehaviorTree.Nodes
                 return CreateFailureOutput(input);
             }
 
-            // tick the current child
-            TAction result = children[childCurrent].Tick(input);
-
-            // Check the state of the result
-            State resultState = GetStateFromOutput(result);
-
-            // process by result
-            switch (resultState)
+            // try children until one succeeds or is running
+            while (childCurrent < children.Count)
             {
-                case State.SUCCESS:
+                // tick the current child
+                TAction result = children[childCurrent].Tick(input);
+
+                // Check the state of the result
+                State resultState = GetStateFromOutput(result);
+
+                // process by result
+                switch (resultState)
                 {
-                    // selector succeeds immediately
-                    childCurrent = -1;
-                    Reset();
-                    return result;
-                }
-                case State.FAILURE:
-                {
-                    // if there are more children...
-                    if (childCurrent + 1 < children.Count)
+                    case State.SUCCESS:
                     {
-                        // ... move to the next child
-                        childCurrent++;
-                        return CreateRunningOutput(input);
-                    }
-                    else
-                    {
-                        // ... selector failed (all children failed)
+                        // selector succeeds immediately
                         childCurrent = -1;
                         Reset();
                         return result;
                     }
-                }
-                case State.RUNNING:
-                {
-                    return result;
-                }
-                default:
-                {
-                    throw new NotImplementedException("Unhandled state in Selector");
+                    case State.FAILURE:
+                    {
+                        // if there are more children...
+                        if (childCurrent + 1 < children.Count)
+                        {
+                            // ... move to the next child and continue the loop
+                            childCurrent++;
+                            // continue to try next child in same tick
+                        }
+                        else
+                        {
+                            // ... selector failed (all children failed)
+                            childCurrent = -1;
+                            Reset();
+                            return result;
+                        }
+                        break;
+                    }
+                    case State.RUNNING:
+                    {
+                        // child is running, return and continue with this child next tick
+                        return result;
+                    }
+                    default:
+                    {
+                        throw new NotImplementedException("Unhandled state in Selector");
+                    }
                 }
             }
+
+            // This should never be reached
+            throw new InvalidOperationException("Selector: unexpected state");
         }
 
         public override void Reset()
