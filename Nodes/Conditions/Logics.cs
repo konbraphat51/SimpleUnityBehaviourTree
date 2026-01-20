@@ -3,10 +3,11 @@ using System.Collections.ObjectModel;
 
 namespace BehaviorTree.Nodes
 {
-    public abstract class Logic<Agent> : ConditionEvaluator<Agent>
+    public abstract class Logic<Agent, TSensory> : ConditionEvaluator<Agent, TSensory>
+        where TSensory : struct
     {
-        protected List<ConditionEvaluator<Agent>> _children = new List<ConditionEvaluator<Agent>>();
-        public ReadOnlyCollection<ConditionEvaluator<Agent>> children
+        protected List<ConditionEvaluator<Agent, TSensory>> _children = new List<ConditionEvaluator<Agent, TSensory>>();
+        public ReadOnlyCollection<ConditionEvaluator<Agent, TSensory>> children
         {
             get { return _children.AsReadOnly(); }
         }

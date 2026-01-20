@@ -4,7 +4,9 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Sample
 {
     [SerializableNode("SampleAction")]
-    public class SampleAction<Agent> : Action<Agent>
+    public class SampleAction<Agent, TSensory, TAction> : Action<Agent, TSensory, TAction>
+        where TSensory : struct
+        where TAction : struct
     {
         [ConstructorParameter("p0")]
         public int p0 { get; private set; }
@@ -19,10 +21,10 @@ namespace BehaviorTree.Sample
             this.p1 = p1;
         }
 
-        protected override bool TakeAction(Agent agent)
+        protected override TAction TakeAction(TSensory input)
         {
             // Implement your action logic here
-            return true; // Return true if action is successful
+            return default(TAction); // Return appropriate output struct
         }
     }
 }
