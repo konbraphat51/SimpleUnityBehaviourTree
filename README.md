@@ -6,7 +6,7 @@ A lightweight and flexible Behavior Tree implementation for Unity, designed with
 
 - **Generic Agent Support**: Works with any agent type through generic type parameters
 - **Struct-Based Input/Output**: Type-safe input and output structs for behavior tree execution
-- **Core Node Types**: Includes essential behavior tree nodes (Sequence, Random, Condition, Action)
+- **Core Node Types**: Includes essential behavior tree nodes (Sequence, Selector, Random, Condition, Action)
 - **Condition Evaluators**: Built-in logic operators (And, Or, Not) for complex condition building
 - **Serialization Support**: JSON serialization and deserialization for saving and loading behavior trees
 - **Extensible Architecture**: Easy to create custom nodes and condition evaluators
@@ -183,7 +183,7 @@ var shouldHeal = new Or<object, GameInput>(new ConditionEvaluator<object, GameIn
 
 ### Extending Control Nodes
 
-When using struct-based I/O, control nodes like Sequence and Random need to know how to extract the state from TAction:
+When using struct-based I/O, control nodes like Sequence, Selector, and Random need to know how to extract the state from TAction:
 
 ```csharp
 public class CustomSequence : Sequence<object, GameInput, GameOutput>
@@ -206,6 +206,48 @@ public class CustomSequence : Sequence<object, GameInput, GameOutput>
         return output.state;
     }
 }
+```
+
+### Selector Node
+
+The `Selector` node executes children in order until one succeeds (also known as a Fallback node). You'll need to extend it to handle struct-based I/O:
+
+```csharp
+public class CustomSelector : Selector<object, GameInput, GameOutput>
+{
+    public CustomSelector(Node<object, GameInput, GameOutput>[] children)
+        : base(children) { }
+
+    protected override GameOutput CreateSuccessOutput(GameInput input)
+    {
+        return GameOutput.Success();
+    }
+
+    protected override GameOutput CreateFailureOutput(GameInput input)
+    {
+        return GameOutput.Failure();
+    }
+
+    protected override GameOutput CreateRunningOutput(GameInput input)
+    {
+        return GameOutput.Running();
+    }
+
+    protected override Node<object, GameInput, GameOutput>.State GetStateFromOutput(GameOutput output)
+    {
+        return output.state;
+    }
+}
+
+// Usage
+var selectorNode = new CustomSelector(
+    new Node<object, GameInput, GameOutput>[] 
+    {
+        new TryAttackAction(),
+        new TryFleeAction(),
+        new IdleAction()
+    }
+);
 ```
 
 ### Random Selection Node
@@ -250,6 +292,7 @@ var randomNode = new CustomRandom(
 | `Node<Agent, TSensory, TAction>` | Base abstract class for all nodes with struct-based I/O |
 | `Action<Agent, TSensory, TAction>` | Base class for action/leaf nodes |
 | `Sequence<Agent, TSensory, TAction>` | Executes children in order until one fails |
+| `Selector<Agent, TSensory, TAction>` | Executes children in order until one succeeds |
 | `Random<Agent, TSensory, TAction>` | Selects children randomly based on weights |
 | `Condition<Agent, TSensory, TAction>` | Branches based on condition evaluation |
 
@@ -316,6 +359,7 @@ Node<object, GameInput, GameOutput> rootNode = Deserializer<object, GameInput, G
 │   │   └── Logics.cs        # Base Logic class
 │   └── Controls/
 │       ├── Sequence.cs      # Sequence node
+│       ├── Selector.cs      # Selector node
 │       └── Random.cs        # Random selection node
 ├── Serializations/
 │   ├── Serializer.cs        # JSON serialization
