@@ -6,30 +6,41 @@ namespace BehaviorTree.Sample
 {
     public class SerializationTester : MonoBehaviour
     {
+        // Define test input/output structs for serialization testing
+        public struct TestInput
+        {
+            public int value;
+        }
+
+        public struct TestOutput
+        {
+            public Node<int, TestInput, TestOutput>.State state;
+        }
+
         void Start()
         {
-            Node<int> root = new Sequence<int>(
-                new Node<int>[]
+            Node<int, TestInput, TestOutput> root = new Sequence<int, TestInput, TestOutput>(
+                new Node<int, TestInput, TestOutput>[]
                 {
-                    new Condition<int>(
-                        new And<int>(
-                            new ConditionEvaluator<int>[]
+                    new Condition<int, TestInput, TestOutput>(
+                        new And<int, TestInput>(
+                            new ConditionEvaluator<int, TestInput>[]
                             {
-                                new Not<int>(new SampleEvaluator<int>(10, 1.5f)),
-                                new SampleEvaluator<int>(20, 2.5f),
+                                new Not<int, TestInput>(new SampleEvaluator<int, TestInput>(10, 1.5f)),
+                                new SampleEvaluator<int, TestInput>(20, 2.5f),
                             }
                         ),
-                        new SampleAction<int>(1, 2.0f),
-                        new SampleAction<int>(2, 3.0f)
+                        new SampleAction<int, TestInput, TestOutput>(1, 2.0f),
+                        new SampleAction<int, TestInput, TestOutput>(2, 3.0f)
                     ),
-                    new SampleAction<int>(0, 0.0f),
+                    new SampleAction<int, TestInput, TestOutput>(0, 0.0f),
                 }
             );
 
-            string serializedTree = Serializer<int>.WriteNodeJson(root);
+            string serializedTree = Serializer<int, TestInput, TestOutput>.WriteNodeJson(root);
             Debug.Log(serializedTree);
-            Node<int> deserializedTree = Deserializer<int>.ReadNodeJson(serializedTree);
-            string reserializedTree = Serializer<int>.WriteNodeJson(deserializedTree);
+            Node<int, TestInput, TestOutput> deserializedTree = Deserializer<int, TestInput, TestOutput>.ReadNodeJson(serializedTree);
+            string reserializedTree = Serializer<int, TestInput, TestOutput>.WriteNodeJson(deserializedTree);
             Debug.Log(reserializedTree);
             Debug.Log(serializedTree == reserializedTree);
         }
