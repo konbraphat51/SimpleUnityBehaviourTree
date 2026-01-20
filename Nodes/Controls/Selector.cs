@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using BehaviorTree.Serializations;
 
@@ -9,8 +8,6 @@ namespace BehaviorTree.Nodes
         where TSensory : struct
         where TAction : struct
     {
-        public int childCurrent { get; private set; } = -1;
-
         [ConstructorParameter("children")]
         public Node<Agent, TSensory, TAction>[] childrenArray
         {
@@ -25,112 +22,15 @@ namespace BehaviorTree.Nodes
 
         public override TAction Tick(TSensory input)
         {
-            // if starting selector...
-            if (childCurrent == -1 && children.Count > 0)
+            // try nodes from the beginning of the list in order each tick
+            // execute the first child that can run
+            if (children.Count > 0)
             {
-                // ... start from the first child
-                childCurrent = 0;
-            }
-            // if no child...
-            else if (children.Count == 0)
-            {
-                // ... just return failure
-                return CreateFailureOutput(input);
+                return children[0].Tick(input);
             }
 
-            // try children until one succeeds or is running
-            while (childCurrent < children.Count)
-            {
-                // tick the current child
-                TAction result = children[childCurrent].Tick(input);
-
-                // Check the state of the result
-                State resultState = GetStateFromOutput(result);
-
-                // process by result
-                switch (resultState)
-                {
-                    case State.SUCCESS:
-                    {
-                        // selector succeeds immediately
-                        childCurrent = -1;
-                        Reset();
-                        return result;
-                    }
-                    case State.FAILURE:
-                    {
-                        // if there are more children...
-                        if (childCurrent + 1 < children.Count)
-                        {
-                            // ... move to the next child and continue the loop
-                            childCurrent++;
-                            // continue to try next child in same tick
-                        }
-                        else
-                        {
-                            // ... selector failed (all children failed)
-                            childCurrent = -1;
-                            Reset();
-                            return result;
-                        }
-                        break;
-                    }
-                    case State.RUNNING:
-                    {
-                        // child is running, return and continue with this child next tick
-                        return result;
-                    }
-                    default:
-                    {
-                        throw new NotImplementedException("Unhandled state in Selector");
-                    }
-                }
-            }
-
-            // Should never reach here - all cases are handled above
-            return CreateFailureOutput(input);
-        }
-
-        public override void Reset()
-        {
-            base.Reset();
-            childCurrent = -1;
-        }
-
-        public void AddChild(Node<Agent, TSensory, TAction> child)
-        {
-            _children.Add(child);
-        }
-
-        public void RemoveChild(Node<Agent, TSensory, TAction> child)
-        {
-            _children.Remove(child);
-        }
-
-        // Helper methods to create output with state
-        protected virtual TAction CreateSuccessOutput(TSensory input)
-        {
-            // Default implementation - subclasses should override
+            // if no children, return default
             return default(TAction);
-        }
-
-        protected virtual TAction CreateFailureOutput(TSensory input)
-        {
-            // Default implementation - subclasses should override
-            return default(TAction);
-        }
-
-        protected virtual TAction CreateRunningOutput(TSensory input)
-        {
-            // Default implementation - subclasses should override
-            return default(TAction);
-        }
-
-        protected virtual State GetStateFromOutput(TAction output)
-        {
-            // Default implementation - subclasses should override
-            // This assumes TAction has a State field
-            return State.SUCCESS;
         }
     }
 }
