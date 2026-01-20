@@ -5,6 +5,7 @@ A lightweight and flexible Behavior Tree implementation for Unity, designed with
 ## Features
 
 - **Generic Agent Support**: Works with any agent type through generic type parameters
+- **Struct-Based Input/Output**: Type-safe input and output structs for behavior tree execution
 - **Core Node Types**: Includes essential behavior tree nodes (Sequence, Random, Condition, Action)
 - **Condition Evaluators**: Built-in logic operators (And, Or, Not) for complex condition building
 - **Serialization Support**: JSON serialization and deserialization for saving and loading behavior trees
@@ -19,81 +20,125 @@ A lightweight and flexible Behavior Tree implementation for Unity, designed with
 
 ## Basic Usage
 
-### Creating a Simple Behavior Tree
+### Using Struct-Based Input/Output (Recommended)
+
+The library now supports type-safe input and output structs for behavior tree execution:
 
 ```csharp
 using BehaviorTree;
 using BehaviorTree.Nodes;
 
-// Define your agent type
-public class Enemy
+// Define your input struct - data passed to nodes
+public struct GameInput
 {
+    public float deltaTime;
+    public bool isPlayerNear;
     public float health;
-    public Vector3 position;
 }
 
-// Create nodes
-var attackAction = new MyAttackAction();
-var patrolAction = new MyPatrolAction();
-
-// Build the tree
-var sequence = new Sequence<Enemy>(new Node<Enemy>[] 
+// Define your output struct - result from node execution
+public struct GameOutput
 {
-    attackAction,
-    patrolAction
-});
+    public Node<object, GameInput, GameOutput>.State state;
+    public string message;
+    
+    public static GameOutput Success() => new GameOutput 
+    { 
+        state = Node<object, GameInput, GameOutput>.State.SUCCESS 
+    };
+    
+    public static GameOutput Running() => new GameOutput 
+    { 
+        state = Node<object, GameInput, GameOutput>.State.RUNNING 
+    };
+    
+    public static GameOutput Failure() => new GameOutput 
+    { 
+        state = Node<object, GameInput, GameOutput>.State.FAILURE 
+    };
+}
 
-// Create the behavior tree
-var tree = new BehaviorTree<Enemy>("EnemyAI", sequence, myEnemy);
+// Create custom action
+public class AttackAction : Action<object, GameInput, GameOutput>
+{
+    private float damage;
+    
+    public AttackAction(float damage) : base("Attack")
+    {
+        this.damage = damage;
+    }
+    
+    protected override GameOutput TakeAction(GameInput input)
+    {
+        if (input.isPlayerNear)
+        {
+            return GameOutput.Success();
+        }
+        return GameOutput.Running();
+    }
+}
 
-// Run the tree each frame
+// Build and use the tree
+var root = new AttackAction(10f);
+var tree = new BehaviorTree<object, GameInput, GameOutput>("AI", root, null);
+
 void Update()
 {
-    tree.Tick();
+    var input = new GameInput 
+    { 
+        deltaTime = Time.deltaTime,
+        isPlayerNear = true,
+        health = 100f
+    };
+    
+    GameOutput output = tree.Tick(input);
+    Debug.Log($"State: {output.state}, Message: {output.message}");
 }
 ```
 
 ### Creating Custom Actions
 
-Extend the `Action<Agent>` class to create custom actions:
+Extend the `Action<Agent, TInput, TOutput>` class to create custom actions:
 
 ```csharp
 using BehaviorTree.Nodes;
 using BehaviorTree.Serializations;
 
 [SerializableNode("MoveToTarget")]
-public class MoveToTarget<Agent> : Action<Agent> where Agent : IMovable
+public class MoveToTarget : Action<object, GameInput, GameOutput>
 {
     [ConstructorParameter("speed")]
     public float speed { get; private set; }
 
-    [ConstructorParameter("targetPosition")]
-    public Vector3 targetPosition { get; private set; }
-
-    public MoveToTarget(float speed, Vector3 targetPosition) : base("MoveToTarget")
+    public MoveToTarget(float speed) : base("MoveToTarget")
     {
         this.speed = speed;
-        this.targetPosition = targetPosition;
     }
 
-    protected override bool TakeAction(Agent agent)
+    protected override GameOutput TakeAction(GameInput input)
     {
-        // Return true when action is complete, false to keep running
-        return agent.MoveTowards(targetPosition, speed);
+        // Use input data to make decisions
+        if (input.isPlayerNear)
+        {
+            // Return success output
+            return GameOutput.Success();
+        }
+        // Return running output to continue execution
+        return GameOutput.Running();
     }
 }
 ```
 
 ### Creating Custom Condition Evaluators
 
-Extend `ConditionEvaluator<Agent>` for custom conditions:
+Extend `ConditionEvaluator<Agent, TInput>` for custom conditions:
 
 ```csharp
 using BehaviorTree.Nodes;
 using BehaviorTree.Serializations;
 
 [SerializableEvaluator("IsHealthLow")]
-public class IsHealthLow<Agent> : ConditionEvaluator<Agent> where Agent : IHasHealth
+public class IsHealthLow : ConditionEvaluator<object, GameInput>
 {
     [ConstructorParameter("threshold")]
     public float threshold { get; private set; }
@@ -103,9 +148,9 @@ public class IsHealthLow<Agent> : ConditionEvaluator<Agent> where Agent : IHasHe
         this.threshold = threshold;
     }
 
-    public override bool Evaluate(Agent agent)
+    public override bool Evaluate(GameInput input)
     {
-        return agent.Health < threshold;
+        return input.health < threshold;
     }
 }
 ```
@@ -114,43 +159,83 @@ public class IsHealthLow<Agent> : ConditionEvaluator<Agent> where Agent : IHasHe
 
 ```csharp
 // Create condition evaluators
-var isHealthLow = new IsHealthLow<Enemy>(30f);
-var isEnemyNear = new IsEnemyNear<Enemy>(10f);
+var isHealthLow = new IsHealthLow(30f);
+var isEnemyNear = new IsEnemyNear(10f);
 
 // Combine with logic operators
-var shouldFlee = new And<Enemy>(new ConditionEvaluator<Enemy>[]
+var shouldFlee = new And<object, GameInput>(new ConditionEvaluator<object, GameInput>[]
 {
     isHealthLow,
     isEnemyNear
 });
 
-var shouldNotAttack = new Not<Enemy>(isEnemyNear);
+var shouldNotAttack = new Not<object, GameInput>(isEnemyNear);
 
-var shouldHeal = new Or<Enemy>(new ConditionEvaluator<Enemy>[]
+var shouldHeal = new Or<object, GameInput>(new ConditionEvaluator<object, GameInput>[]
 {
     isHealthLow,
-    new IsPoisoned<Enemy>()
+    new IsPoisoned()
 });
 
-// Use in a Condition node
-var condition = new Condition<Enemy>(
-    shouldFlee,
-    new FleeAction<Enemy>(),  // Execute if true
-    new AttackAction<Enemy>() // Execute if false
-);
+// Use in a Condition node - note that Condition nodes need custom implementation
+// to handle state extraction from TOutput
+```
+
+### Extending Control Nodes
+
+When using struct-based I/O, control nodes like Sequence and Random need to know how to extract the state from TOutput:
+
+```csharp
+public class CustomSequence : Sequence<object, GameInput, GameOutput>
+{
+    public CustomSequence(Node<object, GameInput, GameOutput>[] children)
+        : base(children) { }
+
+    protected override GameOutput CreateSuccessOutput(GameInput input)
+    {
+        return GameOutput.Success();
+    }
+
+    protected override GameOutput CreateRunningOutput(GameInput input)
+    {
+        return GameOutput.Running();
+    }
+
+    protected override Node<object, GameInput, GameOutput>.State GetStateFromOutput(GameOutput output)
+    {
+        return output.state;
+    }
+}
 ```
 
 ### Random Selection Node
 
-The `Random` node selects children based on weighted probability:
+The `Random` node selects children based on weighted probability. You'll need to extend it to handle struct-based I/O:
 
 ```csharp
-var randomNode = new Random<Enemy>(
-    new Node<Enemy>[] 
+public class CustomRandom : Random<object, GameInput, GameOutput>
+{
+    public CustomRandom(Node<object, GameInput, GameOutput>[] children, float[] weights)
+        : base(children, weights) { }
+
+    protected override GameOutput CreateFailureOutput(GameInput input)
     {
-        new PatrolAction<Enemy>(),
-        new IdleAction<Enemy>(),
-        new WanderAction<Enemy>()
+        return GameOutput.Failure();
+    }
+
+    protected override Node<object, GameInput, GameOutput>.State GetStateFromOutput(GameOutput output)
+    {
+        return output.state;
+    }
+}
+
+// Usage
+var randomNode = new CustomRandom(
+    new Node<object, GameInput, GameOutput>[] 
+    {
+        new PatrolAction(),
+        new IdleAction(),
+        new WanderAction()
     },
     new float[] { 0.5f, 0.3f, 0.2f } // Weights
 );
@@ -162,28 +247,30 @@ var randomNode = new Random<Enemy>(
 
 | Node | Description |
 |------|-------------|
-| `Node<Agent>` | Base abstract class for all nodes |
-| `Action<Agent>` | Base class for action/leaf nodes |
-| `Sequence<Agent>` | Executes children in order until one fails |
-| `Random<Agent>` | Selects children randomly based on weights |
-| `Condition<Agent>` | Branches based on condition evaluation |
+| `Node<Agent, TInput, TOutput>` | Base abstract class for all nodes with struct-based I/O |
+| `Action<Agent, TInput, TOutput>` | Base class for action/leaf nodes |
+| `Sequence<Agent, TInput, TOutput>` | Executes children in order until one fails |
+| `Random<Agent, TInput, TOutput>` | Selects children randomly based on weights |
+| `Condition<Agent, TInput, TOutput>` | Branches based on condition evaluation |
 
 ### Condition Evaluators
 
 | Evaluator | Description |
 |-----------|-------------|
-| `ConditionEvaluator<Agent>` | Base class for condition evaluators |
-| `And<Agent>` | Returns true if all conditions are true |
-| `Or<Agent>` | Returns true if any condition is true |
-| `Not<Agent>` | Inverts the condition result |
+| `ConditionEvaluator<Agent, TInput>` | Base class for condition evaluators |
+| `And<Agent, TInput>` | Returns true if all conditions are true |
+| `Or<Agent, TInput>` | Returns true if any condition is true |
+| `Not<Agent, TInput>` | Inverts the condition result |
 
 ## Node States
 
-Each node returns one of three states:
+The State enum is now typically embedded in your TOutput struct:
 
 - `State.RUNNING` - Node is still executing
 - `State.SUCCESS` - Node completed successfully
 - `State.FAILURE` - Node failed
+
+Your TOutput struct should include a State field that control nodes can use to determine execution flow.
 
 ## Serialization
 
@@ -194,7 +281,7 @@ For detailed JSON grammar specification, see [JSON_spec.md](JSON_spec.md).
 ```csharp
 using BehaviorTree.Serializations;
 
-string json = Serializer<Enemy>.WriteNodeJson(rootNode);
+string json = Serializer<object, GameInput, GameOutput>.WriteNodeJson(rootNode);
 // Save json to file
 ```
 
@@ -204,7 +291,7 @@ string json = Serializer<Enemy>.WriteNodeJson(rootNode);
 using BehaviorTree.Serializations;
 
 string json = // Load from file
-Node<Enemy> rootNode = Deserializer<Enemy>.ReadNodeJson(json);
+Node<object, GameInput, GameOutput> rootNode = Deserializer<object, GameInput, GameOutput>.ReadNodeJson(json);
 ```
 
 ### Making Custom Nodes Serializable
