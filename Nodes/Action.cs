@@ -1,15 +1,17 @@
 namespace BehaviorTree.Nodes
 {
-    public abstract class Action<Agent> : Node<Agent>
+    public abstract class Action<Agent, TInput, TOutput> : Node<Agent, TInput, TOutput>
+        where TInput : struct
+        where TOutput : struct
     {
         public Action(string name)
             : base(name) { }
 
-        public override State Tick(Agent agent)
+        public override TOutput Tick(TInput input)
         {
-            return TakeAction(agent) ? State.SUCCESS : State.RUNNING;
+            return TakeAction(input);
         }
 
-        protected abstract bool TakeAction(Agent agent);
+        protected abstract TOutput TakeAction(TInput input);
     }
 }

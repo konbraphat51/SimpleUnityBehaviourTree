@@ -6,11 +6,13 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Nodes
 {
     [SerializableNode("Random")]
-    public class Random<Agent> : Node<Agent>
+    public class Random<Agent, TInput, TOutput> : Node<Agent, TInput, TOutput>
+        where TInput : struct
+        where TOutput : struct
     {
         public struct ChildWithWeight
         {
-            public Node<Agent> child;
+            public Node<Agent, TInput, TOutput> child;
             public float weight;
         }
 
@@ -19,7 +21,7 @@ namespace BehaviorTree.Nodes
         {
             get { return _weights.AsReadOnly(); }
         }
-        public Node<Agent> nodeSelected { get; private set; } = null;
+        public Node<Agent, TInput, TOutput> nodeSelected { get; private set; } = null;
 
         public ChildWithWeight[] childrenWithWeights
         {
@@ -37,7 +39,7 @@ namespace BehaviorTree.Nodes
         }
 
         [ConstructorParameter("children")]
-        public Node<Agent>[] childrenArray
+        public Node<Agent, TInput, TOutput>[] childrenArray
         {
             get { return _children.ToArray(); }
         }
@@ -48,7 +50,7 @@ namespace BehaviorTree.Nodes
             get { return _weights.ToArray(); }
         }
 
-        public Random(Node<Agent>[] children, float[] weights)
+        public Random(Node<Agent, TInput, TOutput>[] children, float[] weights)
             : base("Random")
         {
             _children.AddRange(children);
@@ -60,31 +62,34 @@ namespace BehaviorTree.Nodes
             }
         }
 
-        public Random(Dictionary<Node<Agent>, float> childrenWithWeights)
+        public Random(Dictionary<Node<Agent, TInput, TOutput>, float> childrenWithWeights)
             : base("Random")
         {
-            foreach (KeyValuePair<Node<Agent>, float> pair in childrenWithWeights)
+            foreach (KeyValuePair<Node<Agent, TInput, TOutput>, float> pair in childrenWithWeights)
             {
                 _children.Add(pair.Key);
                 _weights.Add(pair.Value);
             }
         }
 
-        public override State Tick(Agent agent)
+        public override TOutput Tick(TInput input)
         {
             // if not selected yet...
-            State result;
+            TOutput result;
             if (nodeSelected == null)
             {
-                result = SelectChildAndTick(agent);
+                result = SelectChildAndTick(input);
             }
             else
             {
-                result = nodeSelected.Tick(agent);
+                result = nodeSelected.Tick(input);
             }
 
+            // Check the state of the result
+            State resultState = GetStateFromOutput(result);
+
             // if finished...
-            if (result != State.RUNNING)
+            if (resultState != State.RUNNING)
             {
                 // reset when done
                 Reset();
@@ -99,7 +104,7 @@ namespace BehaviorTree.Nodes
             nodeSelected = null;
         }
 
-        public void AddChild(Node<Agent> child, float weight)
+        public void AddChild(Node<Agent, TInput, TOutput> child, float weight)
         {
             _children.Add(child);
             _weights.Add(weight);
@@ -110,7 +115,7 @@ namespace BehaviorTree.Nodes
             _weights[index] = weight;
         }
 
-        public void SetWeight(Node<Agent> child, float weight)
+        public void SetWeight(Node<Agent, TInput, TOutput> child, float weight)
         {
             int index = _children.IndexOf(child);
             if (index >= 0)
@@ -119,7 +124,7 @@ namespace BehaviorTree.Nodes
             }
         }
 
-        public void RemoveChild(Node<Agent> child)
+        public void RemoveChild(Node<Agent, TInput, TOutput> child)
         {
             int index = _children.IndexOf(child);
             if (index >= 0)
@@ -129,16 +134,17 @@ namespace BehaviorTree.Nodes
             }
         }
 
-        protected State SelectChildAndTick(Agent agent)
+        protected TOutput SelectChildAndTick(TInput input)
         {
-            Node<Agent>[] shuffledChildren = ShuffleChildrenByWeights();
-            foreach (Node<Agent> child in shuffledChildren)
+            Node<Agent, TInput, TOutput>[] shuffledChildren = ShuffleChildrenByWeights();
+            foreach (Node<Agent, TInput, TOutput> child in shuffledChildren)
             {
                 // try next child
-                State result = child.Tick(agent);
+                TOutput result = child.Tick(input);
+                State resultState = GetStateFromOutput(result);
 
                 // if not failed...
-                if (result != State.FAILURE)
+                if (resultState != State.FAILURE)
                 {
                     // ... select this child
                     nodeSelected = child;
@@ -149,14 +155,14 @@ namespace BehaviorTree.Nodes
             }
 
             // all children failed
-            return State.FAILURE;
+            return CreateFailureOutput(input);
         }
 
-        protected Node<Agent>[] ShuffleChildrenByWeights()
+        protected Node<Agent, TInput, TOutput>[] ShuffleChildrenByWeights()
         {
             Random random = new Random();
-            List<Node<Agent>> shuffled = new List<Node<Agent>>();
-            List<Node<Agent>> childrenCopy = new List<Node<Agent>>(_children);
+            List<Node<Agent, TInput, TOutput>> shuffled = new List<Node<Agent, TInput, TOutput>>();
+            List<Node<Agent, TInput, TOutput>> childrenCopy = new List<Node<Agent, TInput, TOutput>>(_children);
             List<float> weightsCopy = new List<float>(_weights);
             while (childrenCopy.Count > 0)
             {
@@ -186,6 +192,20 @@ namespace BehaviorTree.Nodes
         private float ComputeRandom(float totalWeight, Random rand)
         {
             return (float)(rand.NextDouble() * totalWeight);
+        }
+
+        // Helper methods to create output with state
+        protected virtual TOutput CreateFailureOutput(TInput input)
+        {
+            // Default implementation - subclasses should override
+            return default(TOutput);
+        }
+
+        protected virtual State GetStateFromOutput(TOutput output)
+        {
+            // Default implementation - subclasses should override
+            // This assumes TOutput has a State field
+            return State.SUCCESS;
         }
     }
 }

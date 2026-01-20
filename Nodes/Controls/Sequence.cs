@@ -5,23 +5,25 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Nodes
 {
     [SerializableNode("Sequence")]
-    public class Sequence<Agent> : Node<Agent>
+    public class Sequence<Agent, TInput, TOutput> : Node<Agent, TInput, TOutput>
+        where TInput : struct
+        where TOutput : struct
     {
         public int childCurrent { get; private set; } = -1;
 
         [ConstructorParameter("children")]
-        public Node<Agent>[] childrenArray
+        public Node<Agent, TInput, TOutput>[] childrenArray
         {
             get { return _children.ToArray(); }
         }
 
-        public Sequence(Node<Agent>[] children)
+        public Sequence(Node<Agent, TInput, TOutput>[] children)
             : base("Sequence")
         {
             _children = children.ToList();
         }
 
-        public override State Tick(Agent agent)
+        public override TOutput Tick(TInput input)
         {
             // if starting sequence...
             if (childCurrent == -1 && children.Count > 0)
@@ -33,14 +35,17 @@ namespace BehaviorTree.Nodes
             else if (children.Count == 0)
             {
                 // ... just return success
-                return State.SUCCESS;
+                return CreateSuccessOutput(input);
             }
 
             // tick the current child
-            State result = children[childCurrent].Tick(agent);
+            TOutput result = children[childCurrent].Tick(input);
+
+            // Check the state of the result
+            State resultState = GetStateFromOutput(result);
 
             // process by result
-            switch (result)
+            switch (resultState)
             {
                 case State.SUCCESS:
                 {
@@ -49,14 +54,14 @@ namespace BehaviorTree.Nodes
                     {
                         // ... move to the next child
                         childCurrent++;
-                        return State.RUNNING;
+                        return CreateRunningOutput(input);
                     }
                     else
                     {
                         // ... sequence succeeded
                         childCurrent = -1;
                         Reset();
-                        return State.SUCCESS;
+                        return result;
                     }
                 }
                 case State.FAILURE:
@@ -64,11 +69,11 @@ namespace BehaviorTree.Nodes
                     // sequence fails immediately
                     childCurrent = -1;
                     Reset();
-                    return State.FAILURE;
+                    return result;
                 }
                 case State.RUNNING:
                 {
-                    return State.RUNNING;
+                    return result;
                 }
                 default:
                 {
@@ -83,14 +88,34 @@ namespace BehaviorTree.Nodes
             childCurrent = -1;
         }
 
-        public void AddChild(Node<Agent> child)
+        public void AddChild(Node<Agent, TInput, TOutput> child)
         {
             _children.Add(child);
         }
 
-        public void RemoveChild(Node<Agent> child)
+        public void RemoveChild(Node<Agent, TInput, TOutput> child)
         {
             _children.Remove(child);
+        }
+
+        // Helper methods to create output with state
+        protected virtual TOutput CreateSuccessOutput(TInput input)
+        {
+            // Default implementation - subclasses should override
+            return default(TOutput);
+        }
+
+        protected virtual TOutput CreateRunningOutput(TInput input)
+        {
+            // Default implementation - subclasses should override
+            return default(TOutput);
+        }
+
+        protected virtual State GetStateFromOutput(TOutput output)
+        {
+            // Default implementation - subclasses should override
+            // This assumes TOutput has a State field
+            return State.SUCCESS;
         }
     }
 }

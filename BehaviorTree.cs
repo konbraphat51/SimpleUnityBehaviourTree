@@ -2,10 +2,12 @@ using BehaviorTree.Nodes;
 
 namespace BehaviorTree
 {
-    public class BehaviorTree<Agent>
+    public class BehaviorTree<Agent, TInput, TOutput>
+        where TInput : struct
+        where TOutput : struct
     {
         public string name;
-        public Node<Agent> nodeRoot;
+        public Node<Agent, TInput, TOutput> nodeRoot;
 
         private Agent _agent;
         public Agent agent
@@ -18,33 +20,17 @@ namespace BehaviorTree
             }
         }
 
-        public BehaviorTree(string name, Node<Agent> root, Agent agent)
+        public BehaviorTree(string name, Node<Agent, TInput, TOutput> root, Agent agent)
         {
             this.name = name;
             nodeRoot = root;
             this.agent = agent;
         }
 
-        public bool Tick()
+        public TOutput Tick(TInput input)
         {
-            Node<Agent>.State result = nodeRoot.Tick(agent);
-
-            // if all tree failed...
-            if (result == Node<Agent>.State.FAILURE)
-            {
-                // ... tree execution is failing
-                return false;
-            }
-
-            // if finished...
-            if (result == Node<Agent>.State.SUCCESS)
-            {
-                // ... reset the tree
-                nodeRoot.Reset();
-            }
-
-            // tree is running properly
-            return true;
+            TOutput result = nodeRoot.Tick(input);
+            return result;
         }
     }
 }

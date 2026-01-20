@@ -2,7 +2,8 @@ using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
 {
-    public abstract class ConditionEvaluator<Agent> : ISerializableBT
+    public abstract class ConditionEvaluator<Agent, TInput> : ISerializableBT
+        where TInput : struct
     {
         public string name { get; private set; }
 
@@ -11,6 +12,6 @@ namespace BehaviorTree.Nodes
             this.name = name;
         }
 
-        public abstract bool Evaluate(Agent agent);
+        public abstract bool Evaluate(TInput input);
     }
 }

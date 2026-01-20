@@ -4,7 +4,8 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Sample
 {
     [SerializableEvaluator("SampleEvaluator")]
-    public class SampleEvaluator<Agent> : ConditionEvaluator<Agent>
+    public class SampleEvaluator<Agent, TInput> : ConditionEvaluator<Agent, TInput>
+        where TInput : struct
     {
         [ConstructorParameter("p0")]
         public int p0 { get; private set; }
@@ -19,7 +20,7 @@ namespace BehaviorTree.Sample
             this.p1 = p1;
         }
 
-        public override bool Evaluate(Agent agent)
+        public override bool Evaluate(TInput input)
         {
             // Sample evaluation logic
             return true;
