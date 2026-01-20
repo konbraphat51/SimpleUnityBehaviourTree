@@ -2,12 +2,12 @@ using BehaviorTree.Nodes;
 
 namespace BehaviorTree
 {
-    public class BehaviorTree<Agent, TInput, TOutput>
-        where TInput : struct
-        where TOutput : struct
+    public class BehaviorTree<Agent, TSensory, TAction>
+        where TSensory : struct
+        where TAction : struct
     {
         public string name;
-        public Node<Agent, TInput, TOutput> nodeRoot;
+        public Node<Agent, TSensory, TAction> nodeRoot;
 
         private Agent _agent;
         public Agent agent
@@ -20,16 +20,16 @@ namespace BehaviorTree
             }
         }
 
-        public BehaviorTree(string name, Node<Agent, TInput, TOutput> root, Agent agent)
+        public BehaviorTree(string name, Node<Agent, TSensory, TAction> root, Agent agent)
         {
             this.name = name;
             nodeRoot = root;
             this.agent = agent;
         }
 
-        public TOutput Tick(TInput input)
+        public TAction Tick(TSensory input)
         {
-            TOutput result = nodeRoot.Tick(input);
+            TAction result = nodeRoot.Tick(input);
             return result;
         }
     }

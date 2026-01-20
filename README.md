@@ -98,7 +98,7 @@ void Update()
 
 ### Creating Custom Actions
 
-Extend the `Action<Agent, TInput, TOutput>` class to create custom actions:
+Extend the `Action<Agent, TSensory, TAction>` class to create custom actions:
 
 ```csharp
 using BehaviorTree.Nodes;
@@ -131,7 +131,7 @@ public class MoveToTarget : Action<object, GameInput, GameOutput>
 
 ### Creating Custom Condition Evaluators
 
-Extend `ConditionEvaluator<Agent, TInput>` for custom conditions:
+Extend `ConditionEvaluator<Agent, TSensory>` for custom conditions:
 
 ```csharp
 using BehaviorTree.Nodes;
@@ -178,12 +178,12 @@ var shouldHeal = new Or<object, GameInput>(new ConditionEvaluator<object, GameIn
 });
 
 // Use in a Condition node - note that Condition nodes need custom implementation
-// to handle state extraction from TOutput
+// to handle state extraction from TAction
 ```
 
 ### Extending Control Nodes
 
-When using struct-based I/O, control nodes like Sequence and Random need to know how to extract the state from TOutput:
+When using struct-based I/O, control nodes like Sequence and Random need to know how to extract the state from TAction:
 
 ```csharp
 public class CustomSequence : Sequence<object, GameInput, GameOutput>
@@ -247,30 +247,30 @@ var randomNode = new CustomRandom(
 
 | Node | Description |
 |------|-------------|
-| `Node<Agent, TInput, TOutput>` | Base abstract class for all nodes with struct-based I/O |
-| `Action<Agent, TInput, TOutput>` | Base class for action/leaf nodes |
-| `Sequence<Agent, TInput, TOutput>` | Executes children in order until one fails |
-| `Random<Agent, TInput, TOutput>` | Selects children randomly based on weights |
-| `Condition<Agent, TInput, TOutput>` | Branches based on condition evaluation |
+| `Node<Agent, TSensory, TAction>` | Base abstract class for all nodes with struct-based I/O |
+| `Action<Agent, TSensory, TAction>` | Base class for action/leaf nodes |
+| `Sequence<Agent, TSensory, TAction>` | Executes children in order until one fails |
+| `Random<Agent, TSensory, TAction>` | Selects children randomly based on weights |
+| `Condition<Agent, TSensory, TAction>` | Branches based on condition evaluation |
 
 ### Condition Evaluators
 
 | Evaluator | Description |
 |-----------|-------------|
-| `ConditionEvaluator<Agent, TInput>` | Base class for condition evaluators |
-| `And<Agent, TInput>` | Returns true if all conditions are true |
-| `Or<Agent, TInput>` | Returns true if any condition is true |
-| `Not<Agent, TInput>` | Inverts the condition result |
+| `ConditionEvaluator<Agent, TSensory>` | Base class for condition evaluators |
+| `And<Agent, TSensory>` | Returns true if all conditions are true |
+| `Or<Agent, TSensory>` | Returns true if any condition is true |
+| `Not<Agent, TSensory>` | Inverts the condition result |
 
 ## Node States
 
-The State enum is now typically embedded in your TOutput struct:
+The State enum is now typically embedded in your TAction struct:
 
 - `State.RUNNING` - Node is still executing
 - `State.SUCCESS` - Node completed successfully
 - `State.FAILURE` - Node failed
 
-Your TOutput struct should include a State field that control nodes can use to determine execution flow.
+Your TAction struct should include a State field that control nodes can use to determine execution flow.
 
 ## Serialization
 

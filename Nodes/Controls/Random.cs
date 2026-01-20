@@ -6,13 +6,13 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Nodes
 {
     [SerializableNode("Random")]
-    public class Random<Agent, TInput, TOutput> : Node<Agent, TInput, TOutput>
-        where TInput : struct
-        where TOutput : struct
+    public class Random<Agent, TSensory, TAction> : Node<Agent, TSensory, TAction>
+        where TSensory : struct
+        where TAction : struct
     {
         public struct ChildWithWeight
         {
-            public Node<Agent, TInput, TOutput> child;
+            public Node<Agent, TSensory, TAction> child;
             public float weight;
         }
 
@@ -21,7 +21,7 @@ namespace BehaviorTree.Nodes
         {
             get { return _weights.AsReadOnly(); }
         }
-        public Node<Agent, TInput, TOutput> nodeSelected { get; private set; } = null;
+        public Node<Agent, TSensory, TAction> nodeSelected { get; private set; } = null;
 
         public ChildWithWeight[] childrenWithWeights
         {
@@ -39,7 +39,7 @@ namespace BehaviorTree.Nodes
         }
 
         [ConstructorParameter("children")]
-        public Node<Agent, TInput, TOutput>[] childrenArray
+        public Node<Agent, TSensory, TAction>[] childrenArray
         {
             get { return _children.ToArray(); }
         }
@@ -50,7 +50,7 @@ namespace BehaviorTree.Nodes
             get { return _weights.ToArray(); }
         }
 
-        public Random(Node<Agent, TInput, TOutput>[] children, float[] weights)
+        public Random(Node<Agent, TSensory, TAction>[] children, float[] weights)
             : base("Random")
         {
             _children.AddRange(children);
@@ -62,20 +62,20 @@ namespace BehaviorTree.Nodes
             }
         }
 
-        public Random(Dictionary<Node<Agent, TInput, TOutput>, float> childrenWithWeights)
+        public Random(Dictionary<Node<Agent, TSensory, TAction>, float> childrenWithWeights)
             : base("Random")
         {
-            foreach (KeyValuePair<Node<Agent, TInput, TOutput>, float> pair in childrenWithWeights)
+            foreach (KeyValuePair<Node<Agent, TSensory, TAction>, float> pair in childrenWithWeights)
             {
                 _children.Add(pair.Key);
                 _weights.Add(pair.Value);
             }
         }
 
-        public override TOutput Tick(TInput input)
+        public override TAction Tick(TSensory input)
         {
             // if not selected yet...
-            TOutput result;
+            TAction result;
             if (nodeSelected == null)
             {
                 result = SelectChildAndTick(input);
@@ -104,7 +104,7 @@ namespace BehaviorTree.Nodes
             nodeSelected = null;
         }
 
-        public void AddChild(Node<Agent, TInput, TOutput> child, float weight)
+        public void AddChild(Node<Agent, TSensory, TAction> child, float weight)
         {
             _children.Add(child);
             _weights.Add(weight);
@@ -115,7 +115,7 @@ namespace BehaviorTree.Nodes
             _weights[index] = weight;
         }
 
-        public void SetWeight(Node<Agent, TInput, TOutput> child, float weight)
+        public void SetWeight(Node<Agent, TSensory, TAction> child, float weight)
         {
             int index = _children.IndexOf(child);
             if (index >= 0)
@@ -124,7 +124,7 @@ namespace BehaviorTree.Nodes
             }
         }
 
-        public void RemoveChild(Node<Agent, TInput, TOutput> child)
+        public void RemoveChild(Node<Agent, TSensory, TAction> child)
         {
             int index = _children.IndexOf(child);
             if (index >= 0)
@@ -134,13 +134,13 @@ namespace BehaviorTree.Nodes
             }
         }
 
-        protected TOutput SelectChildAndTick(TInput input)
+        protected TAction SelectChildAndTick(TSensory input)
         {
-            Node<Agent, TInput, TOutput>[] shuffledChildren = ShuffleChildrenByWeights();
-            foreach (Node<Agent, TInput, TOutput> child in shuffledChildren)
+            Node<Agent, TSensory, TAction>[] shuffledChildren = ShuffleChildrenByWeights();
+            foreach (Node<Agent, TSensory, TAction> child in shuffledChildren)
             {
                 // try next child
-                TOutput result = child.Tick(input);
+                TAction result = child.Tick(input);
                 State resultState = GetStateFromOutput(result);
 
                 // if not failed...
@@ -158,11 +158,11 @@ namespace BehaviorTree.Nodes
             return CreateFailureOutput(input);
         }
 
-        protected Node<Agent, TInput, TOutput>[] ShuffleChildrenByWeights()
+        protected Node<Agent, TSensory, TAction>[] ShuffleChildrenByWeights()
         {
             Random random = new Random();
-            List<Node<Agent, TInput, TOutput>> shuffled = new List<Node<Agent, TInput, TOutput>>();
-            List<Node<Agent, TInput, TOutput>> childrenCopy = new List<Node<Agent, TInput, TOutput>>(_children);
+            List<Node<Agent, TSensory, TAction>> shuffled = new List<Node<Agent, TSensory, TAction>>();
+            List<Node<Agent, TSensory, TAction>> childrenCopy = new List<Node<Agent, TSensory, TAction>>(_children);
             List<float> weightsCopy = new List<float>(_weights);
             while (childrenCopy.Count > 0)
             {
@@ -195,16 +195,16 @@ namespace BehaviorTree.Nodes
         }
 
         // Helper methods to create output with state
-        protected virtual TOutput CreateFailureOutput(TInput input)
+        protected virtual TAction CreateFailureOutput(TSensory input)
         {
             // Default implementation - subclasses should override
-            return default(TOutput);
+            return default(TAction);
         }
 
-        protected virtual State GetStateFromOutput(TOutput output)
+        protected virtual State GetStateFromOutput(TAction output)
         {
             // Default implementation - subclasses should override
-            // This assumes TOutput has a State field
+            // This assumes TAction has a State field
             return State.SUCCESS;
         }
     }

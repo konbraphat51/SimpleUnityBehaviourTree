@@ -4,22 +4,22 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Nodes
 {
     [SerializableEvaluator("Not")]
-    public class Not<Agent, TInput> : Logic<Agent, TInput>
-        where TInput : struct
+    public class Not<Agent, TSensory> : Logic<Agent, TSensory>
+        where TSensory : struct
     {
         [ConstructorParameter("condition")]
-        public ConditionEvaluator<Agent, TInput> condition
+        public ConditionEvaluator<Agent, TSensory> condition
         {
             get { return _children[0]; }
         }
 
-        public Not(ConditionEvaluator<Agent, TInput> condition)
+        public Not(ConditionEvaluator<Agent, TSensory> condition)
             : base("Not")
         {
-            _children = new List<ConditionEvaluator<Agent, TInput>> { condition };
+            _children = new List<ConditionEvaluator<Agent, TSensory>> { condition };
         }
 
-        public override bool Evaluate(TInput input)
+        public override bool Evaluate(TSensory input)
         {
             return !_children[0].Evaluate(input);
         }

@@ -5,25 +5,25 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Nodes
 {
     [SerializableNode("Sequence")]
-    public class Sequence<Agent, TInput, TOutput> : Node<Agent, TInput, TOutput>
-        where TInput : struct
-        where TOutput : struct
+    public class Sequence<Agent, TSensory, TAction> : Node<Agent, TSensory, TAction>
+        where TSensory : struct
+        where TAction : struct
     {
         public int childCurrent { get; private set; } = -1;
 
         [ConstructorParameter("children")]
-        public Node<Agent, TInput, TOutput>[] childrenArray
+        public Node<Agent, TSensory, TAction>[] childrenArray
         {
             get { return _children.ToArray(); }
         }
 
-        public Sequence(Node<Agent, TInput, TOutput>[] children)
+        public Sequence(Node<Agent, TSensory, TAction>[] children)
             : base("Sequence")
         {
             _children = children.ToList();
         }
 
-        public override TOutput Tick(TInput input)
+        public override TAction Tick(TSensory input)
         {
             // if starting sequence...
             if (childCurrent == -1 && children.Count > 0)
@@ -39,7 +39,7 @@ namespace BehaviorTree.Nodes
             }
 
             // tick the current child
-            TOutput result = children[childCurrent].Tick(input);
+            TAction result = children[childCurrent].Tick(input);
 
             // Check the state of the result
             State resultState = GetStateFromOutput(result);
@@ -88,33 +88,33 @@ namespace BehaviorTree.Nodes
             childCurrent = -1;
         }
 
-        public void AddChild(Node<Agent, TInput, TOutput> child)
+        public void AddChild(Node<Agent, TSensory, TAction> child)
         {
             _children.Add(child);
         }
 
-        public void RemoveChild(Node<Agent, TInput, TOutput> child)
+        public void RemoveChild(Node<Agent, TSensory, TAction> child)
         {
             _children.Remove(child);
         }
 
         // Helper methods to create output with state
-        protected virtual TOutput CreateSuccessOutput(TInput input)
+        protected virtual TAction CreateSuccessOutput(TSensory input)
         {
             // Default implementation - subclasses should override
-            return default(TOutput);
+            return default(TAction);
         }
 
-        protected virtual TOutput CreateRunningOutput(TInput input)
+        protected virtual TAction CreateRunningOutput(TSensory input)
         {
             // Default implementation - subclasses should override
-            return default(TOutput);
+            return default(TAction);
         }
 
-        protected virtual State GetStateFromOutput(TOutput output)
+        protected virtual State GetStateFromOutput(TAction output)
         {
             // Default implementation - subclasses should override
-            // This assumes TOutput has a State field
+            // This assumes TAction has a State field
             return State.SUCCESS;
         }
     }

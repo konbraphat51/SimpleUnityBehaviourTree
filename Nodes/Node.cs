@@ -3,9 +3,9 @@ using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
 {
-    public abstract class Node<Agent, TInput, TOutput> : ISerializableBT
-        where TInput : struct
-        where TOutput : struct
+    public abstract class Node<Agent, TSensory, TAction> : ISerializableBT
+        where TSensory : struct
+        where TAction : struct
     {
         public enum State
         {
@@ -15,8 +15,8 @@ namespace BehaviorTree.Nodes
         }
 
         public string name { get; private set; }
-        protected List<Node<Agent, TInput, TOutput>> _children = new List<Node<Agent, TInput, TOutput>>();
-        public IReadOnlyList<Node<Agent, TInput, TOutput>> children
+        protected List<Node<Agent, TSensory, TAction>> _children = new List<Node<Agent, TSensory, TAction>>();
+        public IReadOnlyList<Node<Agent, TSensory, TAction>> children
         {
             get { return _children.AsReadOnly(); }
         }
@@ -26,11 +26,11 @@ namespace BehaviorTree.Nodes
             this.name = name;
         }
 
-        public abstract TOutput Tick(TInput input);
+        public abstract TAction Tick(TSensory input);
 
         public virtual void Reset()
         {
-            foreach (Node<Agent, TInput, TOutput> child in children)
+            foreach (Node<Agent, TSensory, TAction> child in children)
             {
                 child.Reset();
             }

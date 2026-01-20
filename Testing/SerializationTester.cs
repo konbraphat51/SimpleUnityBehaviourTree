@@ -7,40 +7,40 @@ namespace BehaviorTree.Sample
     public class SerializationTester : MonoBehaviour
     {
         // Define test input/output structs for serialization testing
-        public struct TestInput
+        public struct TestSensory
         {
             public int value;
         }
 
-        public struct TestOutput
+        public struct TestAction
         {
-            public Node<int, TestInput, TestOutput>.State state;
+            public Node<int, TestSensory, TestAction>.State state;
         }
 
         void Start()
         {
-            Node<int, TestInput, TestOutput> root = new Sequence<int, TestInput, TestOutput>(
-                new Node<int, TestInput, TestOutput>[]
+            Node<int, TestSensory, TestAction> root = new Sequence<int, TestSensory, TestAction>(
+                new Node<int, TestSensory, TestAction>[]
                 {
-                    new Condition<int, TestInput, TestOutput>(
-                        new And<int, TestInput>(
-                            new ConditionEvaluator<int, TestInput>[]
+                    new Condition<int, TestSensory, TestAction>(
+                        new And<int, TestSensory>(
+                            new ConditionEvaluator<int, TestSensory>[]
                             {
-                                new Not<int, TestInput>(new SampleEvaluator<int, TestInput>(10, 1.5f)),
-                                new SampleEvaluator<int, TestInput>(20, 2.5f),
+                                new Not<int, TestSensory>(new SampleEvaluator<int, TestSensory>(10, 1.5f)),
+                                new SampleEvaluator<int, TestSensory>(20, 2.5f),
                             }
                         ),
-                        new SampleAction<int, TestInput, TestOutput>(1, 2.0f),
-                        new SampleAction<int, TestInput, TestOutput>(2, 3.0f)
+                        new SampleAction<int, TestSensory, TestAction>(1, 2.0f),
+                        new SampleAction<int, TestSensory, TestAction>(2, 3.0f)
                     ),
-                    new SampleAction<int, TestInput, TestOutput>(0, 0.0f),
+                    new SampleAction<int, TestSensory, TestAction>(0, 0.0f),
                 }
             );
 
-            string serializedTree = Serializer<int, TestInput, TestOutput>.WriteNodeJson(root);
+            string serializedTree = Serializer<int, TestSensory, TestAction>.WriteNodeJson(root);
             Debug.Log(serializedTree);
-            Node<int, TestInput, TestOutput> deserializedTree = Deserializer<int, TestInput, TestOutput>.ReadNodeJson(serializedTree);
-            string reserializedTree = Serializer<int, TestInput, TestOutput>.WriteNodeJson(deserializedTree);
+            Node<int, TestSensory, TestAction> deserializedTree = Deserializer<int, TestSensory, TestAction>.ReadNodeJson(serializedTree);
+            string reserializedTree = Serializer<int, TestSensory, TestAction>.WriteNodeJson(deserializedTree);
             Debug.Log(reserializedTree);
             Debug.Log(serializedTree == reserializedTree);
         }

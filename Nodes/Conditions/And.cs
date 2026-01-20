@@ -4,24 +4,24 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Nodes
 {
     [SerializableEvaluator("And")]
-    public class And<Agent, TInput> : Logic<Agent, TInput>
-        where TInput : struct
+    public class And<Agent, TSensory> : Logic<Agent, TSensory>
+        where TSensory : struct
     {
         [ConstructorParameter("conditions")]
-        public ConditionEvaluator<Agent, TInput>[] conditionsArray
+        public ConditionEvaluator<Agent, TSensory>[] conditionsArray
         {
             get { return _children.ToArray(); }
         }
 
-        public And(ConditionEvaluator<Agent, TInput>[] conditions)
+        public And(ConditionEvaluator<Agent, TSensory>[] conditions)
             : base("And")
         {
             _children = conditions.ToList();
         }
 
-        public override bool Evaluate(TInput input)
+        public override bool Evaluate(TSensory input)
         {
-            foreach (ConditionEvaluator<Agent, TInput> condition in _children)
+            foreach (ConditionEvaluator<Agent, TSensory> condition in _children)
             {
                 if (!condition.Evaluate(input))
                 {
@@ -31,7 +31,7 @@ namespace BehaviorTree.Nodes
             return true;
         }
 
-        public void AddCondition(ConditionEvaluator<Agent, TInput> condition)
+        public void AddCondition(ConditionEvaluator<Agent, TSensory> condition)
         {
             _children.Add(condition);
         }
