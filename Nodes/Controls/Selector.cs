@@ -87,8 +87,8 @@ namespace BehaviorTree.Nodes
                 }
             }
 
-            // This should never be reached
-            throw new InvalidOperationException("Selector: unexpected state");
+            // Should never reach here - all cases are handled above
+            return CreateFailureOutput(input);
         }
 
         public override void Reset()
