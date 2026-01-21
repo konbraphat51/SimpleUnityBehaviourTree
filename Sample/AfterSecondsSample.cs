@@ -109,24 +109,24 @@ namespace BehaviorTree.Sample
         public float duration { get; private set; }
 
         private float _elapsedTime = 0f;
+        
+        // Cache reflection metadata for performance
+        private static System.Reflection.FieldInfo _deltaTimeField;
+        private static System.Reflection.PropertyInfo _deltaTimeProperty;
+        private static bool _reflectionInitialized = false;
 
         public TimedSampleAction(string actionName, float duration)
             : base(actionName)
         {
             this.actionName = actionName;
             this.duration = duration;
+            InitializeReflection();
         }
 
         protected override TAction TakeAction(TSensory input)
         {
-            // Extract deltaTime using reflection
-            var deltaTimeField = typeof(TSensory).GetField("deltaTime");
-            float deltaTime = 0f;
-            if (deltaTimeField != null && deltaTimeField.FieldType == typeof(float))
-            {
-                deltaTime = (float)deltaTimeField.GetValue(input);
-            }
-
+            // Extract deltaTime using cached reflection metadata
+            float deltaTime = GetDeltaTime(input);
             _elapsedTime += deltaTime;
 
             // Return running or success based on duration
@@ -138,6 +138,40 @@ namespace BehaviorTree.Sample
         {
             base.Reset();
             _elapsedTime = 0f;
+        }
+        
+        private static void InitializeReflection()
+        {
+            if (_reflectionInitialized)
+                return;
+
+            _deltaTimeField = typeof(TSensory).GetField("deltaTime");
+            if (_deltaTimeField == null || _deltaTimeField.FieldType != typeof(float))
+            {
+                _deltaTimeField = null;
+                _deltaTimeProperty = typeof(TSensory).GetProperty("deltaTime");
+                if (_deltaTimeProperty == null || _deltaTimeProperty.PropertyType != typeof(float))
+                {
+                    _deltaTimeProperty = null;
+                }
+            }
+
+            _reflectionInitialized = true;
+        }
+
+        private float GetDeltaTime(TSensory input)
+        {
+            if (_deltaTimeField != null)
+            {
+                return (float)_deltaTimeField.GetValue(input);
+            }
+
+            if (_deltaTimeProperty != null)
+            {
+                return (float)_deltaTimeProperty.GetValue(input);
+            }
+
+            return 0f;
         }
     }
 }

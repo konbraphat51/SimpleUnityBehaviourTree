@@ -1,3 +1,5 @@
+using System;
+using System.Reflection;
 using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
@@ -23,15 +25,23 @@ namespace BehaviorTree.Nodes
         private string _lastActionName = null;
         private float _accumulatedTime = 0f;
 
+        // Cache reflection metadata for performance
+        private static FieldInfo _deltaTimeField;
+        private static PropertyInfo _deltaTimeProperty;
+        private static FieldInfo _actionNameField;
+        private static PropertyInfo _actionNameProperty;
+        private static bool _reflectionInitialized = false;
+
         public AfterSeconds(float seconds)
             : base("AfterSeconds")
         {
             this.seconds = seconds;
+            InitializeReflection();
         }
 
         public override bool Evaluate(TSensory input)
         {
-            // Extract deltaTime from input using reflection
+            // Extract deltaTime from input using cached reflection metadata
             float deltaTime = GetDeltaTime(input);
 
             // Get the current action name from the input
@@ -60,29 +70,49 @@ namespace BehaviorTree.Nodes
             return _accumulatedTime >= seconds;
         }
 
-        /// <summary>
-        /// Resets the accumulated time and last action name.
-        /// </summary>
-        public void Reset()
+        private static void InitializeReflection()
         {
-            _accumulatedTime = 0f;
-            _lastActionName = null;
+            if (_reflectionInitialized)
+                return;
+
+            // Cache deltaTime field/property
+            _deltaTimeField = typeof(TSensory).GetField("deltaTime");
+            if (_deltaTimeField == null || _deltaTimeField.FieldType != typeof(float))
+            {
+                _deltaTimeField = null;
+                _deltaTimeProperty = typeof(TSensory).GetProperty("deltaTime");
+                if (_deltaTimeProperty == null || _deltaTimeProperty.PropertyType != typeof(float))
+                {
+                    _deltaTimeProperty = null;
+                }
+            }
+
+            // Cache currentActionName field/property
+            _actionNameField = typeof(TSensory).GetField("currentActionName");
+            if (_actionNameField == null || _actionNameField.FieldType != typeof(string))
+            {
+                _actionNameField = null;
+                _actionNameProperty = typeof(TSensory).GetProperty("currentActionName");
+                if (_actionNameProperty == null || _actionNameProperty.PropertyType != typeof(string))
+                {
+                    _actionNameProperty = null;
+                }
+            }
+
+            _reflectionInitialized = true;
         }
 
         private float GetDeltaTime(TSensory input)
         {
-            // Use reflection to get deltaTime field from the input struct
-            var deltaTimeField = typeof(TSensory).GetField("deltaTime");
-            if (deltaTimeField != null && deltaTimeField.FieldType == typeof(float))
+            // Use cached reflection metadata
+            if (_deltaTimeField != null)
             {
-                return (float)deltaTimeField.GetValue(input);
+                return (float)_deltaTimeField.GetValue(input);
             }
 
-            // Fallback to a property
-            var deltaTimeProperty = typeof(TSensory).GetProperty("deltaTime");
-            if (deltaTimeProperty != null && deltaTimeProperty.PropertyType == typeof(float))
+            if (_deltaTimeProperty != null)
             {
-                return (float)deltaTimeProperty.GetValue(input);
+                return (float)_deltaTimeProperty.GetValue(input);
             }
 
             // If no deltaTime is found, return 0 (no time progression)
@@ -91,18 +121,15 @@ namespace BehaviorTree.Nodes
 
         private string GetCurrentActionName(TSensory input)
         {
-            // Use reflection to get currentActionName field from the input struct
-            var actionNameField = typeof(TSensory).GetField("currentActionName");
-            if (actionNameField != null && actionNameField.FieldType == typeof(string))
+            // Use cached reflection metadata
+            if (_actionNameField != null)
             {
-                return actionNameField.GetValue(input) as string;
+                return _actionNameField.GetValue(input) as string;
             }
 
-            // Fallback to a property
-            var actionNameProperty = typeof(TSensory).GetProperty("currentActionName");
-            if (actionNameProperty != null && actionNameProperty.PropertyType == typeof(string))
+            if (_actionNameProperty != null)
             {
-                return actionNameProperty.GetValue(input) as string;
+                return _actionNameProperty.GetValue(input) as string;
             }
 
             // If no currentActionName is found, return null
