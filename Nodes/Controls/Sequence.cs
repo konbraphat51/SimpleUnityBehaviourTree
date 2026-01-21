@@ -23,7 +23,7 @@ namespace BehaviorTree.Nodes
             _children = children.ToList();
         }
 
-        public override TAction Tick(TSensory input, ref BtInformation btInfo)
+        public override TAction Tick(TSensory input, BtInformation btInfo)
         {
             // if starting sequence...
             if (childCurrent == -1 && children.Count > 0)
@@ -39,7 +39,7 @@ namespace BehaviorTree.Nodes
             }
 
             // tick the current child
-            TAction result = children[childCurrent].Tick(input, ref btInfo);
+            TAction result = children[childCurrent].Tick(input, btInfo);
 
             // Check the state of the result
             State resultState = GetStateFromOutput(result);

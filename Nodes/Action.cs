@@ -7,7 +7,7 @@ namespace BehaviorTree.Nodes
         public Action(string name)
             : base(name) { }
 
-        public override TAction Tick(TSensory input, ref BtInformation btInfo)
+        public override TAction Tick(TSensory input, BtInformation btInfo)
         {
             // Update action tracking in BtInformation
             if (btInfo.currentActionName != name)

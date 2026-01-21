@@ -4,7 +4,7 @@ namespace BehaviorTree
     /// Information passed through the behavior tree during Tick.
     /// Contains time tracking data for time-based conditions like AfterSeconds.
     /// </summary>
-    public struct BtInformation
+    public class BtInformation
     {
         /// <summary>
         /// Time elapsed since last tick (delta time).

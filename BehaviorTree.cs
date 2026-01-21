@@ -30,7 +30,7 @@ namespace BehaviorTree
         public TAction Tick(TSensory input, float deltaTime)
         {
             BtInformation btInfo = new BtInformation(deltaTime);
-            TAction result = nodeRoot.Tick(input, ref btInfo);
+            TAction result = nodeRoot.Tick(input, btInfo);
             return result;
         }
     }
