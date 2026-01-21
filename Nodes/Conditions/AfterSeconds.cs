@@ -7,10 +7,9 @@ namespace BehaviorTree.Nodes
     /// has been called continuously for a specified duration.
     /// Resets when a different action node is called.
     /// </summary>
-    /// <typeparam name="Agent">The agent type</typeparam>
     /// <typeparam name="TSensory">The sensory input struct type</typeparam>
     [SerializableEvaluator("AfterSeconds")]
-    public class AfterSeconds<Agent, TSensory> : ConditionEvaluator<Agent, TSensory>
+    public class AfterSeconds<TSensory> : ConditionEvaluator<TSensory>
         where TSensory : struct
     {
         [ConstructorParameter("seconds")]

@@ -4,17 +4,17 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Nodes
 {
     [SerializableNode("Selector")]
-    public class Selector<Agent, TSensory, TAction> : Node<Agent, TSensory, TAction>
+    public class Selector<TSensory, TAction> : Node<TSensory, TAction>
         where TSensory : struct
         where TAction : struct
     {
         [ConstructorParameter("children")]
-        public Node<Agent, TSensory, TAction>[] childrenArray
+        public Node<TSensory, TAction>[] childrenArray
         {
             get { return _children.ToArray(); }
         }
 
-        public Selector(Node<Agent, TSensory, TAction>[] children)
+        public Selector(Node<TSensory, TAction>[] children)
             : base("Selector")
         {
             _children = children.ToList();

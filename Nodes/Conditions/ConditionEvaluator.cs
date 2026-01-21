@@ -2,7 +2,7 @@ using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
 {
-    public abstract class ConditionEvaluator<Agent, TSensory> : ISerializableBT
+    public abstract class ConditionEvaluator<TSensory> : ISerializableBT
         where TSensory : struct
     {
         public string name { get; private set; }
