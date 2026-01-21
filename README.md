@@ -89,8 +89,8 @@ void Update()
         health = 100f
     };
     
-    // Pass deltaTime as second parameter to Tick
-    GameOutput output = tree.Tick(input, Time.deltaTime);
+    // Tick measures time internally using system clock
+    GameOutput output = tree.Tick(input);
     Debug.Log($"State: {output.state}, Message: {output.message}");
 }
 ```
@@ -185,7 +185,7 @@ var shouldHeal = new Or<object, GameInput>(new ConditionEvaluator<object, GameIn
 The `AfterSeconds` evaluator returns true after an action has been running continuously for a specified duration. This is useful for implementing timeout behaviors, animations that need to complete, or state transitions based on duration.
 
 **How it works:**
-- Time information is passed through a `BtInformation` struct in the Tick method
+- BehaviorTree automatically tracks time using the system clock
 - Action nodes automatically track when they're executing
 - The timer resets when a different action is detected
 
@@ -214,7 +214,7 @@ var tree = new BehaviorTree<object, GameInput, GameOutput>(
     null
 );
 
-// In your update loop, pass deltaTime to Tick
+// In your update loop
 void Update()
 {
     var input = new GameInput
@@ -223,12 +223,12 @@ void Update()
         isPlayerNear = CheckPlayerProximity()
     };
     
-    // Pass deltaTime as second parameter
-    GameOutput output = tree.Tick(input, Time.deltaTime);
+    // Time is tracked automatically
+    GameOutput output = tree.Tick(input);
 }
 ```
 
-**Note:** The timer resets automatically when a different action node starts executing, allowing you to create behaviors that depend on continuous action execution. You can check the current action and elapsed time via `tree.currentAction` and `tree.currentActionElapsedTime`.
+**Note:** The timer resets automatically when a different action node starts executing, allowing you to create behaviors that depend on continuous action execution.
 
 ### Extending Control Nodes
 
