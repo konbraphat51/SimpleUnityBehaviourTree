@@ -80,6 +80,22 @@ Executes children in order until one fails.
 **Parameters:**
 - `children` (array of Node): Child nodes to execute in sequence
 
+### Selector
+
+Executes children in order until one succeeds.
+
+```json
+{
+  "type": "Selector",
+  "params": {
+    "children": [<Node>, <Node>, ...]
+  }
+}
+```
+
+**Parameters:**
+- `children` (array of Node): Child nodes to try in order
+
 ### Random
 
 Selects children based on weighted probability.
