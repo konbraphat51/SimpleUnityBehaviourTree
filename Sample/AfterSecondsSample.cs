@@ -70,7 +70,9 @@ namespace BehaviorTree.Sample
             // Log every second for demonstration
             if (Time.frameCount % 60 == 0)
             {
-                Debug.Log($"Time: {_testTimer:F2}s, Current Action: {_tree.currentAction?.name ?? "None"}, Elapsed: {_tree.currentActionElapsedTime:F2}s, State: {output.state}");
+                string currentActionName = _tree.currentAction?.name ?? "None";
+                float elapsedTime = _tree.currentActionElapsedTime;
+                Debug.Log($"Time: {_testTimer:F2}s, Current Action: {currentActionName}, Elapsed: {elapsedTime:F2}s, State: {output.state}");
             }
         }
     }

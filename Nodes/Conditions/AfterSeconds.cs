@@ -11,8 +11,9 @@ namespace BehaviorTree.Nodes
     /// </summary>
     /// <typeparam name="Agent">The agent type</typeparam>
     /// <typeparam name="TSensory">The sensory input struct type</typeparam>
+    /// <typeparam name="TAction">The action output struct type</typeparam>
     [SerializableEvaluator("AfterSeconds")]
-    public class AfterSeconds<Agent, TSensory, TAction> : ConditionEvaluator<Agent, TSensory>
+    public class AfterSeconds<Agent, TSensory, TAction> : ConditionEvaluator<Agent, TSensory>, IBehaviorTreeAware<Agent, TSensory, TAction>
         where TSensory : struct
         where TAction : struct
     {
@@ -31,7 +32,7 @@ namespace BehaviorTree.Nodes
         /// Sets the behavior tree reference for this evaluator.
         /// Called by the Condition node when setting up the tree.
         /// </summary>
-        internal void SetBehaviorTree(BehaviorTree<Agent, TSensory, TAction> tree)
+        void IBehaviorTreeAware<Agent, TSensory, TAction>.SetBehaviorTree(BehaviorTree<Agent, TSensory, TAction> tree)
         {
             _behaviorTree = tree;
         }
@@ -48,3 +49,4 @@ namespace BehaviorTree.Nodes
         }
     }
 }
+

@@ -117,10 +117,10 @@ namespace BehaviorTree.Nodes
         {
             base.SetBehaviorTree(tree);
 
-            // If the evaluator is an AfterSeconds evaluator, set its behavior tree reference
-            if (evaluator is AfterSeconds<Agent, TSensory, TAction> afterSeconds)
+            // If the evaluator implements IBehaviorTreeAware, set its behavior tree reference
+            if (evaluator is IBehaviorTreeAware<Agent, TSensory, TAction> treeAware)
             {
-                afterSeconds.SetBehaviorTree(tree);
+                treeAware.SetBehaviorTree(tree);
             }
         }
 
