@@ -181,6 +181,51 @@ var shouldHeal = new Or<object, GameInput>(new ConditionEvaluator<object, GameIn
 // to handle state extraction from TAction
 ```
 
+### Using AfterSeconds for Time-Based Conditions
+
+The `AfterSeconds` evaluator returns true after an action has been running continuously for a specified duration. This is useful for implementing timeout behaviors, animations that need to complete, or state transitions based on duration.
+
+**Requirements:**
+- Your sensory input struct must include a `deltaTime` field (float) for time tracking
+- Your sensory input struct must include a `currentActionName` field (string) to identify the current action
+
+```csharp
+// Define sensory input with required fields
+public struct GameInput
+{
+    public float deltaTime;           // Required for AfterSeconds
+    public string currentActionName;  // Required for AfterSeconds
+    public float health;
+    public bool isPlayerNear;
+}
+
+// Create an AfterSeconds evaluator
+var afterThreeSeconds = new AfterSeconds<object, GameInput>(3.0f);
+
+// Use in a Condition node to switch behavior after 3 seconds
+var timedCondition = new Condition<object, GameInput, GameOutput>(
+    afterThreeSeconds,
+    new SwitchTacticAction(),  // Run this after 3 seconds
+    new DefaultAction()         // Run this before 3 seconds
+);
+
+// In your update loop, populate the sensory input
+void Update()
+{
+    var input = new GameInput
+    {
+        deltaTime = Time.deltaTime,
+        currentActionName = GetCurrentActionName(),  // Track which action is running
+        health = playerHealth,
+        isPlayerNear = CheckPlayerProximity()
+    };
+    
+    GameOutput output = tree.Tick(input);
+}
+```
+
+**Note:** The timer resets automatically when a different action is detected, allowing you to create behaviors that depend on continuous action execution.
+
 ### Extending Control Nodes
 
 When using struct-based I/O, control nodes like Sequence, Selector, and Random need to know how to extract the state from TAction:
@@ -304,6 +349,7 @@ var randomNode = new CustomRandom(
 | `And<Agent, TSensory>` | Returns true if all conditions are true |
 | `Or<Agent, TSensory>` | Returns true if any condition is true |
 | `Not<Agent, TSensory>` | Inverts the condition result |
+| `AfterSeconds<Agent, TSensory>` | Returns true after the most recent action has been called continuously for a specified duration |
 
 ## Node States
 
