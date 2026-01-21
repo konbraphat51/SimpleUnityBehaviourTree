@@ -9,6 +9,12 @@ namespace BehaviorTree.Nodes
 
         public override TAction Tick(TSensory input)
         {
+            // Register this action with the behavior tree for time tracking
+            if (behaviorTree != null)
+            {
+                behaviorTree.RegisterActionTick(this, input);
+            }
+
             return TakeAction(input);
         }
 

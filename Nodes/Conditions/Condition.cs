@@ -113,6 +113,17 @@ namespace BehaviorTree.Nodes
             currentEvaluation = Evaluation.NOT_YET;
         }
 
+        internal new void SetBehaviorTree(BehaviorTree<Agent, TSensory, TAction> tree)
+        {
+            base.SetBehaviorTree(tree);
+
+            // If the evaluator is an AfterSeconds evaluator, set its behavior tree reference
+            if (evaluator is AfterSeconds<Agent, TSensory, TAction> afterSeconds)
+            {
+                afterSeconds.SetBehaviorTree(tree);
+            }
+        }
+
         private TAction RunNode(Node<Agent, TSensory, TAction> node, TSensory input)
         {
             if (node != null)

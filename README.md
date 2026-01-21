@@ -187,20 +187,19 @@ The `AfterSeconds` evaluator returns true after an action has been running conti
 
 **Requirements:**
 - Your sensory input struct must include a `deltaTime` field (float) for time tracking
-- Your sensory input struct must include a `currentActionName` field (string) to identify the current action
+- The BehaviorTree must be configured with a deltaTime extractor function
 
 ```csharp
-// Define sensory input with required fields
+// Define sensory input with deltaTime field
 public struct GameInput
 {
-    public float deltaTime;           // Required for AfterSeconds
-    public string currentActionName;  // Required for AfterSeconds
+    public float deltaTime;      // Required for time tracking
     public float health;
     public bool isPlayerNear;
 }
 
 // Create an AfterSeconds evaluator
-var afterThreeSeconds = new AfterSeconds<object, GameInput>(3.0f);
+var afterThreeSeconds = new AfterSeconds<object, GameInput, GameOutput>(3.0f);
 
 // Use in a Condition node to switch behavior after 3 seconds
 var timedCondition = new Condition<object, GameInput, GameOutput>(
@@ -209,13 +208,20 @@ var timedCondition = new Condition<object, GameInput, GameOutput>(
     new DefaultAction()         // Run this before 3 seconds
 );
 
+// Create the behavior tree with a deltaTime extractor
+var tree = new BehaviorTree<object, GameInput, GameOutput>(
+    "MyTree",
+    timedCondition,
+    null,
+    getDeltaTime: input => input.deltaTime  // Extract deltaTime from input
+);
+
 // In your update loop, populate the sensory input
 void Update()
 {
     var input = new GameInput
     {
         deltaTime = Time.deltaTime,
-        currentActionName = GetCurrentActionName(),  // Track which action is running
         health = playerHealth,
         isPlayerNear = CheckPlayerProximity()
     };
@@ -224,7 +230,7 @@ void Update()
 }
 ```
 
-**Note:** The timer resets automatically when a different action is detected, allowing you to create behaviors that depend on continuous action execution.
+**Note:** The timer resets automatically when a different action node starts executing, allowing you to create behaviors that depend on continuous action execution. You can check the current action and elapsed time via `tree.currentAction` and `tree.currentActionElapsedTime`.
 
 ### Extending Control Nodes
 
