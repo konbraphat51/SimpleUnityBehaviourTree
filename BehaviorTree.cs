@@ -1,5 +1,5 @@
 using BehaviorTree.Nodes;
-using System;
+using System.Diagnostics;
 
 namespace BehaviorTree
 {
@@ -21,33 +21,24 @@ namespace BehaviorTree
             }
         }
 
-        private DateTime _lastTickTime;
-        private bool _isFirstTick = true;
+        private Stopwatch _stopwatch;
+        private long _lastTickTicks;
 
         public BehaviorTree(string name, Node<Agent, TSensory, TAction> root, Agent agent)
         {
             this.name = name;
             nodeRoot = root;
             this.agent = agent;
+            _stopwatch = Stopwatch.StartNew();
+            _lastTickTicks = 0;
         }
 
         public TAction Tick(TSensory input)
         {
-            // Calculate deltaTime using system time
-            float deltaTime = 0f;
-            DateTime currentTime = DateTime.UtcNow;
-            
-            if (_isFirstTick)
-            {
-                _isFirstTick = false;
-                deltaTime = 0f;
-            }
-            else
-            {
-                deltaTime = (float)(currentTime - _lastTickTime).TotalSeconds;
-            }
-            
-            _lastTickTime = currentTime;
+            // Calculate deltaTime using high-precision stopwatch
+            long currentTicks = _stopwatch.ElapsedTicks;
+            float deltaTime = (float)(currentTicks - _lastTickTicks) / Stopwatch.Frequency;
+            _lastTickTicks = currentTicks;
 
             BtInformation btInfo = new BtInformation(deltaTime);
             TAction result = nodeRoot.Tick(input, btInfo);
