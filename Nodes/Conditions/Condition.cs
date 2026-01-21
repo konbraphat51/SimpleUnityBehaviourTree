@@ -57,10 +57,10 @@ namespace BehaviorTree.Nodes
             this.childFalse = childFalse;
         }
 
-        public override TAction Tick(TSensory input)
+        public override TAction Tick(TSensory input, ref BtInformation btInfo)
         {
             // Re-evaluate condition every frame
-            bool evaluation = evaluator.Evaluate(input);
+            bool evaluation = evaluator.Evaluate(input, btInfo);
             Evaluation newEvaluation = evaluation ? Evaluation.TRUE : Evaluation.FALSE;
 
             // If evaluation changed, reset all children
@@ -82,10 +82,10 @@ namespace BehaviorTree.Nodes
             switch (currentEvaluation)
             {
                 case Evaluation.TRUE:
-                    result = RunNode(childTrue, input);
+                    result = RunNode(childTrue, input, ref btInfo);
                     break;
                 case Evaluation.FALSE:
-                    result = RunNode(childFalse, input);
+                    result = RunNode(childFalse, input, ref btInfo);
                     break;
                 default:
                     throw new NotImplementedException(
@@ -113,22 +113,11 @@ namespace BehaviorTree.Nodes
             currentEvaluation = Evaluation.NOT_YET;
         }
 
-        internal new void SetBehaviorTree(BehaviorTree<Agent, TSensory, TAction> tree)
-        {
-            base.SetBehaviorTree(tree);
-
-            // If the evaluator implements IBehaviorTreeAware, set its behavior tree reference
-            if (evaluator is IBehaviorTreeAware<Agent, TSensory, TAction> treeAware)
-            {
-                treeAware.SetBehaviorTree(tree);
-            }
-        }
-
-        private TAction RunNode(Node<Agent, TSensory, TAction> node, TSensory input)
+        private TAction RunNode(Node<Agent, TSensory, TAction> node, TSensory input, ref BtInformation btInfo)
         {
             if (node != null)
             {
-                return node.Tick(input);
+                return node.Tick(input, ref btInfo);
             }
             else
             {

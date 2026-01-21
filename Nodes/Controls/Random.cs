@@ -72,17 +72,17 @@ namespace BehaviorTree.Nodes
             }
         }
 
-        public override TAction Tick(TSensory input)
+        public override TAction Tick(TSensory input, ref BtInformation btInfo)
         {
             // if not selected yet...
             TAction result;
             if (nodeSelected == null)
             {
-                result = SelectChildAndTick(input);
+                result = SelectChildAndTick(input, ref btInfo);
             }
             else
             {
-                result = nodeSelected.Tick(input);
+                result = nodeSelected.Tick(input, ref btInfo);
             }
 
             // Check the state of the result
@@ -134,13 +134,13 @@ namespace BehaviorTree.Nodes
             }
         }
 
-        protected TAction SelectChildAndTick(TSensory input)
+        protected TAction SelectChildAndTick(TSensory input, ref BtInformation btInfo)
         {
             Node<Agent, TSensory, TAction>[] shuffledChildren = ShuffleChildrenByWeights();
             foreach (Node<Agent, TSensory, TAction> child in shuffledChildren)
             {
                 // try next child
-                TAction result = child.Tick(input);
+                TAction result = child.Tick(input, ref btInfo);
                 State resultState = GetStateFromOutput(result);
 
                 // if not failed...

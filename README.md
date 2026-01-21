@@ -31,7 +31,6 @@ using BehaviorTree.Nodes;
 // Define your input struct - data passed to nodes
 public struct GameInput
 {
-    public float deltaTime;
     public bool isPlayerNear;
     public float health;
 }
@@ -86,12 +85,12 @@ void Update()
 {
     var input = new GameInput 
     { 
-        deltaTime = Time.deltaTime,
         isPlayerNear = true,
         health = 100f
     };
     
-    GameOutput output = tree.Tick(input);
+    // Pass deltaTime as second parameter to Tick
+    GameOutput output = tree.Tick(input, Time.deltaTime);
     Debug.Log($"State: {output.state}, Message: {output.message}");
 }
 ```
@@ -185,21 +184,21 @@ var shouldHeal = new Or<object, GameInput>(new ConditionEvaluator<object, GameIn
 
 The `AfterSeconds` evaluator returns true after an action has been running continuously for a specified duration. This is useful for implementing timeout behaviors, animations that need to complete, or state transitions based on duration.
 
-**Requirements:**
-- Your sensory input struct must include a `deltaTime` field (float) for time tracking
-- The BehaviorTree must be configured with a deltaTime extractor function
+**How it works:**
+- Time information is passed through a `BtInformation` struct in the Tick method
+- Action nodes automatically track when they're executing
+- The timer resets when a different action is detected
 
 ```csharp
-// Define sensory input with deltaTime field
+// Define sensory input
 public struct GameInput
 {
-    public float deltaTime;      // Required for time tracking
     public float health;
     public bool isPlayerNear;
 }
 
 // Create an AfterSeconds evaluator
-var afterThreeSeconds = new AfterSeconds<object, GameInput, GameOutput>(3.0f);
+var afterThreeSeconds = new AfterSeconds<object, GameInput>(3.0f);
 
 // Use in a Condition node to switch behavior after 3 seconds
 var timedCondition = new Condition<object, GameInput, GameOutput>(
@@ -208,25 +207,24 @@ var timedCondition = new Condition<object, GameInput, GameOutput>(
     new DefaultAction()         // Run this before 3 seconds
 );
 
-// Create the behavior tree with a deltaTime extractor
+// Create the behavior tree
 var tree = new BehaviorTree<object, GameInput, GameOutput>(
     "MyTree",
     timedCondition,
-    null,
-    getDeltaTime: input => input.deltaTime  // Extract deltaTime from input
+    null
 );
 
-// In your update loop, populate the sensory input
+// In your update loop, pass deltaTime to Tick
 void Update()
 {
     var input = new GameInput
     {
-        deltaTime = Time.deltaTime,
         health = playerHealth,
         isPlayerNear = CheckPlayerProximity()
     };
     
-    GameOutput output = tree.Tick(input);
+    // Pass deltaTime as second parameter
+    GameOutput output = tree.Tick(input, Time.deltaTime);
 }
 ```
 

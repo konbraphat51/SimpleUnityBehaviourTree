@@ -11,11 +11,10 @@ namespace BehaviorTree.Sample
     /// </summary>
     public class AfterSecondsSample : MonoBehaviour
     {
-        // Define sensory input struct with deltaTime for time tracking
+        // Define sensory input struct
         public struct TimedSensory
         {
-            public float deltaTime;  // Required for time tracking
-            public float value;      // Example additional data
+            public float value;  // Example data
         }
 
         // Define action output struct
@@ -31,7 +30,7 @@ namespace BehaviorTree.Sample
         void Start()
         {
             // Create an AfterSeconds evaluator that returns true after 2 seconds
-            var afterTwoSeconds = new AfterSeconds<int, TimedSensory, TimedAction>(2.0f);
+            var afterTwoSeconds = new AfterSeconds<int, TimedSensory>(2.0f);
 
             // Create sample actions
             var actionA = new TimedSampleAction<int, TimedSensory, TimedAction>("ActionA", 1.0f);
@@ -44,12 +43,11 @@ namespace BehaviorTree.Sample
                 actionA   // If false (before 2 seconds), run ActionA
             );
 
-            // Create the behavior tree with a deltaTime extractor
+            // Create the behavior tree
             _tree = new BehaviorTree<int, TimedSensory, TimedAction>(
                 "AfterSecondsDemo",
                 conditionNode,
-                0,
-                getDeltaTime: input => input.deltaTime  // Extract deltaTime from sensory input
+                0
             );
 
             Debug.Log("AfterSeconds sample started. ActionA will run, then after 2 seconds, ActionB will run.");
@@ -61,18 +59,16 @@ namespace BehaviorTree.Sample
 
             var input = new TimedSensory
             {
-                deltaTime = Time.deltaTime,
                 value = _testTimer
             };
 
-            TimedAction output = _tree.Tick(input);
+            // Tick the tree with deltaTime
+            TimedAction output = _tree.Tick(input, Time.deltaTime);
             
             // Log every second for demonstration
             if (Time.frameCount % 60 == 0)
             {
-                string currentActionName = _tree.currentAction?.name ?? "None";
-                float elapsedTime = _tree.currentActionElapsedTime;
-                Debug.Log($"Time: {_testTimer:F2}s, Current Action: {currentActionName}, Elapsed: {elapsedTime:F2}s, State: {output.state}");
+                Debug.Log($"Time: {_testTimer:F2}s, State: {output.state}");
             }
         }
     }

@@ -12,6 +12,6 @@ namespace BehaviorTree.Nodes
             this.name = name;
         }
 
-        public abstract bool Evaluate(TSensory input);
+        public abstract bool Evaluate(TSensory input, BtInformation btInfo);
     }
 }

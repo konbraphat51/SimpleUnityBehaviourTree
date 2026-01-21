@@ -7,13 +7,17 @@ namespace BehaviorTree.Nodes
         public Action(string name)
             : base(name) { }
 
-        public override TAction Tick(TSensory input)
+        public override TAction Tick(TSensory input, ref BtInformation btInfo)
         {
-            // Register this action with the behavior tree for time tracking
-            if (behaviorTree != null)
+            // Update action tracking in BtInformation
+            if (btInfo.currentActionName != name)
             {
-                behaviorTree.RegisterActionTick(this, input);
+                // Different action - reset timer
+                btInfo.currentActionName = name;
+                btInfo.currentActionElapsedTime = 0f;
             }
+
+            btInfo.currentActionElapsedTime += btInfo.deltaTime;
 
             return TakeAction(input);
         }
