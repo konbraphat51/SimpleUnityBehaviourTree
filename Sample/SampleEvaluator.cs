@@ -20,7 +20,7 @@ namespace BehaviorTree.Sample
             this.p1 = p1;
         }
 
-        public override bool Evaluate(TSensory input)
+        public override bool Evaluate(TSensory input, BtInformation btInfo)
         {
             // Sample evaluation logic
             return true;

@@ -31,7 +31,6 @@ using BehaviorTree.Nodes;
 // Define your input struct - data passed to nodes
 public struct GameInput
 {
-    public float deltaTime;
     public bool isPlayerNear;
     public float health;
 }
@@ -86,11 +85,11 @@ void Update()
 {
     var input = new GameInput 
     { 
-        deltaTime = Time.deltaTime,
         isPlayerNear = true,
         health = 100f
     };
     
+    // Tick measures time internally using system clock
     GameOutput output = tree.Tick(input);
     Debug.Log($"State: {output.state}, Message: {output.message}");
 }
@@ -180,6 +179,56 @@ var shouldHeal = new Or<object, GameInput>(new ConditionEvaluator<object, GameIn
 // Use in a Condition node - note that Condition nodes need custom implementation
 // to handle state extraction from TAction
 ```
+
+### Using AfterSeconds for Time-Based Conditions
+
+The `AfterSeconds` evaluator returns true after an action has been running continuously for a specified duration. This is useful for implementing timeout behaviors, animations that need to complete, or state transitions based on duration.
+
+**How it works:**
+- BehaviorTree automatically tracks time using the system clock
+- Action nodes automatically track when they're executing
+- The timer resets when a different action is detected
+
+```csharp
+// Define sensory input
+public struct GameInput
+{
+    public float health;
+    public bool isPlayerNear;
+}
+
+// Create an AfterSeconds evaluator
+var afterThreeSeconds = new AfterSeconds<object, GameInput>(3.0f);
+
+// Use in a Condition node to switch behavior after 3 seconds
+var timedCondition = new Condition<object, GameInput, GameOutput>(
+    afterThreeSeconds,
+    new SwitchTacticAction(),  // Run this after 3 seconds
+    new DefaultAction()         // Run this before 3 seconds
+);
+
+// Create the behavior tree
+var tree = new BehaviorTree<object, GameInput, GameOutput>(
+    "MyTree",
+    timedCondition,
+    null
+);
+
+// In your update loop
+void Update()
+{
+    var input = new GameInput
+    {
+        health = playerHealth,
+        isPlayerNear = CheckPlayerProximity()
+    };
+    
+    // Time is tracked automatically
+    GameOutput output = tree.Tick(input);
+}
+```
+
+**Note:** The timer resets automatically when a different action node starts executing, allowing you to create behaviors that depend on continuous action execution.
 
 ### Extending Control Nodes
 
@@ -304,6 +353,7 @@ var randomNode = new CustomRandom(
 | `And<Agent, TSensory>` | Returns true if all conditions are true |
 | `Or<Agent, TSensory>` | Returns true if any condition is true |
 | `Not<Agent, TSensory>` | Inverts the condition result |
+| `AfterSeconds<Agent, TSensory>` | Returns true after the most recent action has been called continuously for a specified duration |
 
 ## Node States
 

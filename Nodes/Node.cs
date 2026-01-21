@@ -26,7 +26,7 @@ namespace BehaviorTree.Nodes
             this.name = name;
         }
 
-        public abstract TAction Tick(TSensory input);
+        public abstract TAction Tick(TSensory input, BtInformation btInfo);
 
         public virtual void Reset()
         {

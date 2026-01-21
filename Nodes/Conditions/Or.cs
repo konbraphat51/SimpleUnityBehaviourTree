@@ -19,11 +19,11 @@ namespace BehaviorTree.Nodes
             _children = conditions.ToList();
         }
 
-        public override bool Evaluate(TSensory input)
+        public override bool Evaluate(TSensory input, BtInformation btInfo)
         {
             foreach (ConditionEvaluator<Agent, TSensory> condition in _children)
             {
-                if (condition.Evaluate(input))
+                if (condition.Evaluate(input, btInfo))
                 {
                     return true;
                 }
