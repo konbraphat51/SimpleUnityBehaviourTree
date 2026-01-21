@@ -212,7 +212,9 @@ To make a custom node serializable:
 Example:
 ```csharp
 [SerializableNode("MoveToTarget")]
-public class MoveToTarget<Agent> : Action<Agent>
+public class MoveToTarget<TSensory, TAction> : Action<TSensory, TAction>
+    where TSensory : struct
+    where TAction : struct
 {
     [ConstructorParameter("speed")]
     public float speed { get; private set; }
@@ -247,7 +249,8 @@ Similar to custom nodes, but using `[SerializableEvaluator]` attribute:
 
 ```csharp
 [SerializableEvaluator("IsHealthLow")]
-public class IsHealthLow<Agent> : ConditionEvaluator<Agent>
+public class IsHealthLow<TSensory> : ConditionEvaluator<TSensory>
+    where TSensory : struct
 {
     [ConstructorParameter("threshold")]
     public float threshold { get; private set; }
@@ -351,7 +354,7 @@ This represents:
 ```csharp
 using BehaviorTree.Serializations;
 
-string json = Serializer<AgentType>.WriteNodeJson(rootNode);
+string json = Serializer<TSensory, TAction>.WriteNodeJson(rootNode);
 ```
 
 ### Deserializing
@@ -359,7 +362,7 @@ string json = Serializer<AgentType>.WriteNodeJson(rootNode);
 ```csharp
 using BehaviorTree.Serializations;
 
-Node<AgentType> rootNode = Deserializer<AgentType>.ReadNodeJson(json);
+Node<TSensory, TAction> rootNode = Deserializer<TSensory, TAction>.ReadNodeJson(json);
 ```
 
 ## Notes
@@ -367,5 +370,5 @@ Node<AgentType> rootNode = Deserializer<AgentType>.ReadNodeJson(json);
 - All parameter names must match the constructor parameter names exactly
 - The `type` field must match the name specified in `[SerializableNode]` or `[SerializableEvaluator]` attributes
 - Arrays can contain nested nodes or evaluators
-- The serialization is type-safe through generic Agent type parameters
+- The serialization is type-safe through generic TSensory and TAction type parameters
 - Null values are serialized as JSON `null`
