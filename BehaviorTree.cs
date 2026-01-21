@@ -3,32 +3,20 @@ using System;
 
 namespace BehaviorTree
 {
-    public class BehaviorTree<Agent, TSensory, TAction>
+    public class BehaviorTree<TSensory, TAction>
         where TSensory : struct
         where TAction : struct
     {
         public string name;
-        public Node<Agent, TSensory, TAction> nodeRoot;
-
-        private Agent _agent;
-        public Agent agent
-        {
-            get { return _agent; }
-            set
-            {
-                _agent = value;
-                nodeRoot.Reset();
-            }
-        }
+        public Node<TSensory, TAction> nodeRoot;
 
         private DateTime _lastTickTime;
         private bool _isFirstTick = true;
 
-        public BehaviorTree(string name, Node<Agent, TSensory, TAction> root, Agent agent)
+        public BehaviorTree(string name, Node<TSensory, TAction> root)
         {
             this.name = name;
             nodeRoot = root;
-            this.agent = agent;
         }
 
         public TAction Tick(TSensory input)

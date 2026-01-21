@@ -4,7 +4,7 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Sample
 {
     [SerializableEvaluator("SampleEvaluator")]
-    public class SampleEvaluator<Agent, TSensory> : ConditionEvaluator<Agent, TSensory>
+    public class SampleEvaluator<TSensory> : ConditionEvaluator<TSensory>
         where TSensory : struct
     {
         [ConstructorParameter("p0")]

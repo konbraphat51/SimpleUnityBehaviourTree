@@ -5,19 +5,19 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Nodes
 {
     [SerializableNode("Sequence")]
-    public class Sequence<Agent, TSensory, TAction> : Node<Agent, TSensory, TAction>
+    public class Sequence<TSensory, TAction> : Node<TSensory, TAction>
         where TSensory : struct
         where TAction : struct
     {
         public int childCurrent { get; private set; } = -1;
 
         [ConstructorParameter("children")]
-        public Node<Agent, TSensory, TAction>[] childrenArray
+        public Node<TSensory, TAction>[] childrenArray
         {
             get { return _children.ToArray(); }
         }
 
-        public Sequence(Node<Agent, TSensory, TAction>[] children)
+        public Sequence(Node<TSensory, TAction>[] children)
             : base("Sequence")
         {
             _children = children.ToList();
@@ -88,12 +88,12 @@ namespace BehaviorTree.Nodes
             childCurrent = -1;
         }
 
-        public void AddChild(Node<Agent, TSensory, TAction> child)
+        public void AddChild(Node<TSensory, TAction> child)
         {
             _children.Add(child);
         }
 
-        public void RemoveChild(Node<Agent, TSensory, TAction> child)
+        public void RemoveChild(Node<TSensory, TAction> child)
         {
             _children.Remove(child);
         }

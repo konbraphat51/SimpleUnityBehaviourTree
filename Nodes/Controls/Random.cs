@@ -6,13 +6,13 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Nodes
 {
     [SerializableNode("Random")]
-    public class Random<Agent, TSensory, TAction> : Node<Agent, TSensory, TAction>
+    public class Random<TSensory, TAction> : Node<TSensory, TAction>
         where TSensory : struct
         where TAction : struct
     {
         public struct ChildWithWeight
         {
-            public Node<Agent, TSensory, TAction> child;
+            public Node<TSensory, TAction> child;
             public float weight;
         }
 
@@ -21,7 +21,7 @@ namespace BehaviorTree.Nodes
         {
             get { return _weights.AsReadOnly(); }
         }
-        public Node<Agent, TSensory, TAction> nodeSelected { get; private set; } = null;
+        public Node<TSensory, TAction> nodeSelected { get; private set; } = null;
 
         public ChildWithWeight[] childrenWithWeights
         {
@@ -39,7 +39,7 @@ namespace BehaviorTree.Nodes
         }
 
         [ConstructorParameter("children")]
-        public Node<Agent, TSensory, TAction>[] childrenArray
+        public Node<TSensory, TAction>[] childrenArray
         {
             get { return _children.ToArray(); }
         }
@@ -50,7 +50,7 @@ namespace BehaviorTree.Nodes
             get { return _weights.ToArray(); }
         }
 
-        public Random(Node<Agent, TSensory, TAction>[] children, float[] weights)
+        public Random(Node<TSensory, TAction>[] children, float[] weights)
             : base("Random")
         {
             _children.AddRange(children);
@@ -62,10 +62,10 @@ namespace BehaviorTree.Nodes
             }
         }
 
-        public Random(Dictionary<Node<Agent, TSensory, TAction>, float> childrenWithWeights)
+        public Random(Dictionary<Node<TSensory, TAction>, float> childrenWithWeights)
             : base("Random")
         {
-            foreach (KeyValuePair<Node<Agent, TSensory, TAction>, float> pair in childrenWithWeights)
+            foreach (KeyValuePair<Node<TSensory, TAction>, float> pair in childrenWithWeights)
             {
                 _children.Add(pair.Key);
                 _weights.Add(pair.Value);
@@ -104,7 +104,7 @@ namespace BehaviorTree.Nodes
             nodeSelected = null;
         }
 
-        public void AddChild(Node<Agent, TSensory, TAction> child, float weight)
+        public void AddChild(Node<TSensory, TAction> child, float weight)
         {
             _children.Add(child);
             _weights.Add(weight);
@@ -115,7 +115,7 @@ namespace BehaviorTree.Nodes
             _weights[index] = weight;
         }
 
-        public void SetWeight(Node<Agent, TSensory, TAction> child, float weight)
+        public void SetWeight(Node<TSensory, TAction> child, float weight)
         {
             int index = _children.IndexOf(child);
             if (index >= 0)
@@ -124,7 +124,7 @@ namespace BehaviorTree.Nodes
             }
         }
 
-        public void RemoveChild(Node<Agent, TSensory, TAction> child)
+        public void RemoveChild(Node<TSensory, TAction> child)
         {
             int index = _children.IndexOf(child);
             if (index >= 0)
@@ -136,8 +136,8 @@ namespace BehaviorTree.Nodes
 
         protected TAction SelectChildAndTick(TSensory input, BtInformation btInfo)
         {
-            Node<Agent, TSensory, TAction>[] shuffledChildren = ShuffleChildrenByWeights();
-            foreach (Node<Agent, TSensory, TAction> child in shuffledChildren)
+            Node<TSensory, TAction>[] shuffledChildren = ShuffleChildrenByWeights();
+            foreach (Node<TSensory, TAction> child in shuffledChildren)
             {
                 // try next child
                 TAction result = child.Tick(input, btInfo);
@@ -158,11 +158,11 @@ namespace BehaviorTree.Nodes
             return CreateFailureOutput(input);
         }
 
-        protected Node<Agent, TSensory, TAction>[] ShuffleChildrenByWeights()
+        protected Node<TSensory, TAction>[] ShuffleChildrenByWeights()
         {
             Random random = new Random();
-            List<Node<Agent, TSensory, TAction>> shuffled = new List<Node<Agent, TSensory, TAction>>();
-            List<Node<Agent, TSensory, TAction>> childrenCopy = new List<Node<Agent, TSensory, TAction>>(_children);
+            List<Node<TSensory, TAction>> shuffled = new List<Node<TSensory, TAction>>();
+            List<Node<TSensory, TAction>> childrenCopy = new List<Node<TSensory, TAction>>(_children);
             List<float> weightsCopy = new List<float>(_weights);
             while (childrenCopy.Count > 0)
             {

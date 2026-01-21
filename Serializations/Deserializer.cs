@@ -8,11 +8,11 @@ using Newtonsoft.Json.Linq;
 
 namespace BehaviorTree.Serializations
 {
-    public static class Deserializer<Agent, TSensory, TAction>
+    public static class Deserializer<TSensory, TAction>
         where TSensory : struct
         where TAction : struct
     {
-        public static Node<Agent, TSensory, TAction> ReadNodeJson(string json, string[] stacks = null)
+        public static Node<TSensory, TAction> ReadNodeJson(string json, string[] stacks = null)
         {
             if (stacks == null)
             {
@@ -30,10 +30,10 @@ namespace BehaviorTree.Serializations
             JObject jObjectParams = ReadParamsObject(jObjectRoot, stacks);
 
             // create Node instance
-            return (Node<Agent, TSensory, TAction>)CreateInstance(nodeType, jObjectParams, stacks);
+            return (Node<TSensory, TAction>)CreateInstance(nodeType, jObjectParams, stacks);
         }
 
-        public static ConditionEvaluator<Agent, TSensory> ReadEvaluatorJson(
+        public static ConditionEvaluator<TSensory> ReadEvaluatorJson(
             string json,
             string[] stacks = null
         )
@@ -54,7 +54,7 @@ namespace BehaviorTree.Serializations
             JObject jObjectParams = ReadParamsObject(jObjectRoot, stacks);
 
             // create Evaluator instance
-            return (ConditionEvaluator<Agent, TSensory>)CreateInstance(evaluatorType, jObjectParams, stacks);
+            return (ConditionEvaluator<TSensory>)CreateInstance(evaluatorType, jObjectParams, stacks);
         }
 
         private static string ReadTypeName(JObject jObject, string[] stacks)
@@ -142,13 +142,13 @@ namespace BehaviorTree.Serializations
                 }
                 return outputArray;
             }
-            else if (typeof(Node<Agent, TSensory, TAction>).IsAssignableFrom(targetType))
+            else if (typeof(Node<TSensory, TAction>).IsAssignableFrom(targetType))
             {
                 // nested Node
                 string childJson = token.ToString();
                 return ReadNodeJson(childJson, stacks);
             }
-            else if (typeof(ConditionEvaluator<Agent, TSensory>).IsAssignableFrom(targetType))
+            else if (typeof(ConditionEvaluator<TSensory>).IsAssignableFrom(targetType))
             {
                 // nested Evaluator
                 string evaluatorJson = token.ToString();
@@ -166,7 +166,7 @@ namespace BehaviorTree.Serializations
         /// </summary>
         private static Type FindNodeByName(string typeName, string[] stacks)
         {
-            return FindSerializableByName(typeof(SerializableNode), typeName, stacks, typeof(Agent), typeof(TSensory), typeof(TAction));
+            return FindSerializableByName(typeof(SerializableNode), typeName, stacks, typeof(TSensory), typeof(TAction));
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace BehaviorTree.Serializations
         /// </summary>
         private static Type FindEvaluatorByName(string typeName, string[] stacks)
         {
-            return FindSerializableByName(typeof(SerializableEvaluator), typeName, stacks, typeof(Agent), typeof(TSensory));
+            return FindSerializableByName(typeof(SerializableEvaluator), typeName, stacks, typeof(TSensory));
         }
 
         private static Type FindSerializableByName(

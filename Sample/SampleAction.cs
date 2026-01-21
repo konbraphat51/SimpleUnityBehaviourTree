@@ -4,7 +4,7 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Sample
 {
     [SerializableNode("SampleAction")]
-    public class SampleAction<Agent, TSensory, TAction> : Action<Agent, TSensory, TAction>
+    public class SampleAction<TSensory, TAction> : Action<TSensory, TAction>
         where TSensory : struct
         where TAction : struct
     {

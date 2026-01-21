@@ -5,7 +5,7 @@ using BehaviorTree.Serializations;
 namespace BehaviorTree.Nodes
 {
     [SerializableNode("Condition")]
-    public class Condition<Agent, TSensory, TAction> : Node<Agent, TSensory, TAction>
+    public class Condition<TSensory, TAction> : Node<TSensory, TAction>
         where TSensory : struct
         where TAction : struct
     {
@@ -19,36 +19,36 @@ namespace BehaviorTree.Nodes
         public Evaluation currentEvaluation { get; private set; } = Evaluation.NOT_YET;
 
         [ConstructorParameter("evaluator")]
-        public ConditionEvaluator<Agent, TSensory> evaluator { get; private set; }
+        public ConditionEvaluator<TSensory> evaluator { get; private set; }
 
         [ConstructorParameter("childTrue")]
-        public Node<Agent, TSensory, TAction> childTrue
+        public Node<TSensory, TAction> childTrue
         {
             get { return _childTrue; }
             private set
             {
                 _childTrue = value;
-                _children = new List<Node<Agent, TSensory, TAction>> { _childTrue, _childFalse };
+                _children = new List<Node<TSensory, TAction>> { _childTrue, _childFalse };
             }
         }
-        private Node<Agent, TSensory, TAction> _childTrue;
+        private Node<TSensory, TAction> _childTrue;
 
         [ConstructorParameter("childFalse")]
-        public Node<Agent, TSensory, TAction> childFalse
+        public Node<TSensory, TAction> childFalse
         {
             get { return _childFalse; }
             private set
             {
                 _childFalse = value;
-                _children = new List<Node<Agent, TSensory, TAction>> { _childTrue, _childFalse };
+                _children = new List<Node<TSensory, TAction>> { _childTrue, _childFalse };
             }
         }
-        private Node<Agent, TSensory, TAction> _childFalse;
+        private Node<TSensory, TAction> _childFalse;
 
         public Condition(
-            ConditionEvaluator<Agent, TSensory> evaluator,
-            Node<Agent, TSensory, TAction> childTrue,
-            Node<Agent, TSensory, TAction> childFalse
+            ConditionEvaluator<TSensory> evaluator,
+            Node<TSensory, TAction> childTrue,
+            Node<TSensory, TAction> childFalse
         )
             : base(evaluator.name)
         {
@@ -113,7 +113,7 @@ namespace BehaviorTree.Nodes
             currentEvaluation = Evaluation.NOT_YET;
         }
 
-        private TAction RunNode(Node<Agent, TSensory, TAction> node, TSensory input, BtInformation btInfo)
+        private TAction RunNode(Node<TSensory, TAction> node, TSensory input, BtInformation btInfo)
         {
             if (node != null)
             {

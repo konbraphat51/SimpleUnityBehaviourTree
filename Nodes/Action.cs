@@ -1,6 +1,6 @@
 namespace BehaviorTree.Nodes
 {
-    public abstract class Action<Agent, TSensory, TAction> : Node<Agent, TSensory, TAction>
+    public abstract class Action<TSensory, TAction> : Node<TSensory, TAction>
         where TSensory : struct
         where TAction : struct
     {

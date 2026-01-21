@@ -3,7 +3,7 @@ using BehaviorTree.Serializations;
 
 namespace BehaviorTree.Nodes
 {
-    public abstract class Node<Agent, TSensory, TAction> : ISerializableBT
+    public abstract class Node<TSensory, TAction> : ISerializableBT
         where TSensory : struct
         where TAction : struct
     {
@@ -15,8 +15,8 @@ namespace BehaviorTree.Nodes
         }
 
         public string name { get; private set; }
-        protected List<Node<Agent, TSensory, TAction>> _children = new List<Node<Agent, TSensory, TAction>>();
-        public IReadOnlyList<Node<Agent, TSensory, TAction>> children
+        protected List<Node<TSensory, TAction>> _children = new List<Node<TSensory, TAction>>();
+        public IReadOnlyList<Node<TSensory, TAction>> children
         {
             get { return _children.AsReadOnly(); }
         }
@@ -30,7 +30,7 @@ namespace BehaviorTree.Nodes
 
         public virtual void Reset()
         {
-            foreach (Node<Agent, TSensory, TAction> child in children)
+            foreach (Node<TSensory, TAction> child in children)
             {
                 child.Reset();
             }

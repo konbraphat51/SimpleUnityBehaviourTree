@@ -14,33 +14,33 @@ namespace BehaviorTree.Sample
 
         public struct TestAction
         {
-            public Node<int, TestSensory, TestAction>.State state;
+            public Node<TestSensory, TestAction>.State state;
         }
 
         void Start()
         {
-            Node<int, TestSensory, TestAction> root = new Sequence<int, TestSensory, TestAction>(
-                new Node<int, TestSensory, TestAction>[]
+            Node<TestSensory, TestAction> root = new Sequence<TestSensory, TestAction>(
+                new Node<TestSensory, TestAction>[]
                 {
-                    new Condition<int, TestSensory, TestAction>(
-                        new And<int, TestSensory>(
-                            new ConditionEvaluator<int, TestSensory>[]
+                    new Condition<TestSensory, TestAction>(
+                        new And<TestSensory>(
+                            new ConditionEvaluator<TestSensory>[]
                             {
-                                new Not<int, TestSensory>(new SampleEvaluator<int, TestSensory>(10, 1.5f)),
-                                new SampleEvaluator<int, TestSensory>(20, 2.5f),
+                                new Not<TestSensory>(new SampleEvaluator<TestSensory>(10, 1.5f)),
+                                new SampleEvaluator<TestSensory>(20, 2.5f),
                             }
                         ),
-                        new SampleAction<int, TestSensory, TestAction>(1, 2.0f),
-                        new SampleAction<int, TestSensory, TestAction>(2, 3.0f)
+                        new SampleAction<TestSensory, TestAction>(1, 2.0f),
+                        new SampleAction<TestSensory, TestAction>(2, 3.0f)
                     ),
-                    new SampleAction<int, TestSensory, TestAction>(0, 0.0f),
+                    new SampleAction<TestSensory, TestAction>(0, 0.0f),
                 }
             );
 
-            string serializedTree = Serializer<int, TestSensory, TestAction>.WriteNodeJson(root);
+            string serializedTree = Serializer<TestSensory, TestAction>.WriteNodeJson(root);
             Debug.Log(serializedTree);
-            Node<int, TestSensory, TestAction> deserializedTree = Deserializer<int, TestSensory, TestAction>.ReadNodeJson(serializedTree);
-            string reserializedTree = Serializer<int, TestSensory, TestAction>.WriteNodeJson(deserializedTree);
+            Node<TestSensory, TestAction> deserializedTree = Deserializer<TestSensory, TestAction>.ReadNodeJson(serializedTree);
+            string reserializedTree = Serializer<TestSensory, TestAction>.WriteNodeJson(deserializedTree);
             Debug.Log(reserializedTree);
             Debug.Log(serializedTree == reserializedTree);
         }

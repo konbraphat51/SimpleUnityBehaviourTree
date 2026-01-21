@@ -10,11 +10,11 @@ namespace BehaviorTree.Serializations
     /// <summary>
     /// To Json
     /// </summary>
-    public static class Serializer<Agent, TSensory, TAction>
+    public static class Serializer<TSensory, TAction>
         where TSensory : struct
         where TAction : struct
     {
-        public static string WriteNodeJson(Node<Agent, TSensory, TAction> node)
+        public static string WriteNodeJson(Node<TSensory, TAction> node)
         {
             StringWriter stringWriter = new StringWriter();
             JsonWriter writer = new JsonTextWriter(stringWriter);
@@ -43,7 +43,7 @@ namespace BehaviorTree.Serializations
             return stringWriter.ToString();
         }
 
-        public static string WriteEvaluatorJson(ConditionEvaluator<Agent, TSensory> evaluator)
+        public static string WriteEvaluatorJson(ConditionEvaluator<TSensory> evaluator)
         {
             StringWriter stringWriter = new StringWriter();
             JsonWriter writer = new JsonTextWriter(stringWriter);
@@ -92,7 +92,7 @@ namespace BehaviorTree.Serializations
         /// <summary>
         /// Read the value of `SerializableNode` attribute from the node type.
         /// </summary>
-        private static string GetTypeName(Node<Agent, TSensory, TAction> node)
+        private static string GetTypeName(Node<TSensory, TAction> node)
         {
             object[] attrs = node.GetType().GetCustomAttributes(typeof(SerializableNode), false);
             if (attrs.Length == 0)
@@ -108,7 +108,7 @@ namespace BehaviorTree.Serializations
         /// <summary>
         /// Read the value of `SerializableEvaluator` attribute from the node type.
         /// </summary>
-        private static string GetTypeName(ConditionEvaluator<Agent, TSensory> evaluator)
+        private static string GetTypeName(ConditionEvaluator<TSensory> evaluator)
         {
             object[] attrs = evaluator
                 .GetType()
@@ -164,12 +164,12 @@ namespace BehaviorTree.Serializations
         {
             switch (value.GetType())
             {
-                case Type t when typeof(Node<Agent, TSensory, TAction>).IsAssignableFrom(t):
-                    string childJson = WriteNodeJson((Node<Agent, TSensory, TAction>)value);
+                case Type t when typeof(Node<TSensory, TAction>).IsAssignableFrom(t):
+                    string childJson = WriteNodeJson((Node<TSensory, TAction>)value);
                     writer.WriteRawValue(childJson);
                     break;
-                case Type t when typeof(ConditionEvaluator<Agent, TSensory>).IsAssignableFrom(t):
-                    string evaluationJson = WriteEvaluatorJson((ConditionEvaluator<Agent, TSensory>)value);
+                case Type t when typeof(ConditionEvaluator<TSensory>).IsAssignableFrom(t):
+                    string evaluationJson = WriteEvaluatorJson((ConditionEvaluator<TSensory>)value);
                     writer.WriteRawValue(evaluationJson);
                     break;
                 default:
