@@ -1,6 +1,6 @@
 using System;
 
-namespace BehaviorTree.Serializations
+namespace SimpleUnityBehaviorTree.Serializations
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class SerializableEvaluator : Attribute, ISerializableAttribute

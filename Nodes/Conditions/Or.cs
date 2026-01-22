@@ -1,7 +1,7 @@
 using System.Linq;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Nodes
+namespace SimpleUnityBehaviorTree.Nodes
 {
     [SerializableEvaluator("Or")]
     public class Or<TSensory> : Logic<TSensory>

@@ -1,7 +1,7 @@
-using BehaviorTree.Nodes;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Nodes;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Sample
+namespace SimpleUnityBehaviorTree.Sample
 {
     [SerializableNode("SampleAction")]
     public class SampleAction<TSensory, TAction> : Action<TSensory, TAction>

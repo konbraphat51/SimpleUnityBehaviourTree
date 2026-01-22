@@ -1,8 +1,8 @@
-using BehaviorTree.Nodes;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Nodes;
+using SimpleUnityBehaviorTree.Serializations;
 using UnityEngine;
 
-namespace BehaviorTree.Sample
+namespace SimpleUnityBehaviorTree.Sample
 {
     public class SerializationTester : MonoBehaviour
     {
@@ -39,8 +39,13 @@ namespace BehaviorTree.Sample
 
             string serializedTree = Serializer<TestSensory, TestAction>.WriteNodeJson(root);
             Debug.Log(serializedTree);
-            Node<TestSensory, TestAction> deserializedTree = Deserializer<TestSensory, TestAction>.ReadNodeJson(serializedTree);
-            string reserializedTree = Serializer<TestSensory, TestAction>.WriteNodeJson(deserializedTree);
+            Node<TestSensory, TestAction> deserializedTree = Deserializer<
+                TestSensory,
+                TestAction
+            >.ReadNodeJson(serializedTree);
+            string reserializedTree = Serializer<TestSensory, TestAction>.WriteNodeJson(
+                deserializedTree
+            );
             Debug.Log(reserializedTree);
             Debug.Log(serializedTree == reserializedTree);
         }

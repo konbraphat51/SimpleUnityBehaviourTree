@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Nodes
+namespace SimpleUnityBehaviorTree.Nodes
 {
     [SerializableNode("Random")]
     public class Random<TSensory, TAction> : Node<TSensory, TAction>
@@ -162,7 +162,9 @@ namespace BehaviorTree.Nodes
         {
             Random random = new Random();
             List<Node<TSensory, TAction>> shuffled = new List<Node<TSensory, TAction>>();
-            List<Node<TSensory, TAction>> childrenCopy = new List<Node<TSensory, TAction>>(_children);
+            List<Node<TSensory, TAction>> childrenCopy = new List<Node<TSensory, TAction>>(
+                _children
+            );
             List<float> weightsCopy = new List<float>(_weights);
             while (childrenCopy.Count > 0)
             {

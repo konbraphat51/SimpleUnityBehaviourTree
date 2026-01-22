@@ -1,9 +1,9 @@
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Nodes
+namespace SimpleUnityBehaviorTree.Nodes
 {
     /// <summary>
-    /// Condition evaluator that returns true after the most recent action node 
+    /// Condition evaluator that returns true after the most recent action node
     /// has been called continuously for a specified duration.
     /// Resets when a different action node is called.
     /// </summary>
@@ -28,4 +28,3 @@ namespace BehaviorTree.Nodes
         }
     }
 }
-

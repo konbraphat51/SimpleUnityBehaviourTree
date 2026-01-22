@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using BehaviorTree.Nodes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SimpleUnityBehaviorTree.Nodes;
 
-namespace BehaviorTree.Serializations
+namespace SimpleUnityBehaviorTree.Serializations
 {
     public static class Deserializer<TSensory, TAction>
         where TSensory : struct
@@ -54,7 +54,8 @@ namespace BehaviorTree.Serializations
             JObject jObjectParams = ReadParamsObject(jObjectRoot, stacks);
 
             // create Evaluator instance
-            return (ConditionEvaluator<TSensory>)CreateInstance(evaluatorType, jObjectParams, stacks);
+            return (ConditionEvaluator<TSensory>)
+                CreateInstance(evaluatorType, jObjectParams, stacks);
         }
 
         private static string ReadTypeName(JObject jObject, string[] stacks)
@@ -166,7 +167,13 @@ namespace BehaviorTree.Serializations
         /// </summary>
         private static Type FindNodeByName(string typeName, string[] stacks)
         {
-            return FindSerializableByName(typeof(SerializableNode), typeName, stacks, typeof(TSensory), typeof(TAction));
+            return FindSerializableByName(
+                typeof(SerializableNode),
+                typeName,
+                stacks,
+                typeof(TSensory),
+                typeof(TAction)
+            );
         }
 
         /// <summary>
@@ -174,7 +181,12 @@ namespace BehaviorTree.Serializations
         /// </summary>
         private static Type FindEvaluatorByName(string typeName, string[] stacks)
         {
-            return FindSerializableByName(typeof(SerializableEvaluator), typeName, stacks, typeof(TSensory));
+            return FindSerializableByName(
+                typeof(SerializableEvaluator),
+                typeName,
+                stacks,
+                typeof(TSensory)
+            );
         }
 
         private static Type FindSerializableByName(

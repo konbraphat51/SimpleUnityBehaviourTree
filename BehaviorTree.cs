@@ -1,7 +1,7 @@
-using BehaviorTree.Nodes;
 using System;
+using SimpleUnityBehaviorTree.Nodes;
 
-namespace BehaviorTree
+namespace SimpleUnityBehaviorTree
 {
     public class BehaviorTree<TSensory, TAction>
         where TSensory : struct
@@ -24,7 +24,7 @@ namespace BehaviorTree
             // Calculate deltaTime using system time
             float deltaTime = 0f;
             DateTime currentTime = DateTime.UtcNow;
-            
+
             if (_isFirstTick)
             {
                 _isFirstTick = false;
@@ -34,7 +34,7 @@ namespace BehaviorTree
             {
                 deltaTime = (float)(currentTime - _lastTickTime).TotalSeconds;
             }
-            
+
             _lastTickTime = currentTime;
 
             BtInformation btInfo = new BtInformation(deltaTime);

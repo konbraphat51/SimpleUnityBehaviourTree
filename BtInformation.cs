@@ -1,4 +1,4 @@
-namespace BehaviorTree
+namespace SimpleUnityBehaviorTree
 {
     /// <summary>
     /// Information passed through the behavior tree during Tick.

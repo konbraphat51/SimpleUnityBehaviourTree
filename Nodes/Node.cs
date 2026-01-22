@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Nodes
+namespace SimpleUnityBehaviorTree.Nodes
 {
     public abstract class Node<TSensory, TAction> : ISerializableBT
         where TSensory : struct

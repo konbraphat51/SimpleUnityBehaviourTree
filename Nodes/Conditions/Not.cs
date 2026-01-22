@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Nodes
+namespace SimpleUnityBehaviorTree.Nodes
 {
     [SerializableEvaluator("Not")]
     public class Not<TSensory> : Logic<TSensory>

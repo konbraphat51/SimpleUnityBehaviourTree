@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Nodes
+namespace SimpleUnityBehaviorTree.Nodes
 {
     [SerializableNode("Sequence")]
     public class Sequence<TSensory, TAction> : Node<TSensory, TAction>

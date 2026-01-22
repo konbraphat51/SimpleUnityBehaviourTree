@@ -1,7 +1,7 @@
-using BehaviorTree.Nodes;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Nodes;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Sample
+namespace SimpleUnityBehaviorTree.Sample
 {
     [SerializableEvaluator("SampleEvaluator")]
     public class SampleEvaluator<TSensory> : ConditionEvaluator<TSensory>

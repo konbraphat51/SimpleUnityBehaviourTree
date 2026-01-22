@@ -1,6 +1,6 @@
 using System;
 
-namespace BehaviorTree.Serializations
+namespace SimpleUnityBehaviorTree.Serializations
 {
     public class DeserializationException : Exception
     {

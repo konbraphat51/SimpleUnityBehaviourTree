@@ -1,7 +1,7 @@
 using System.Linq;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Nodes
+namespace SimpleUnityBehaviorTree.Nodes
 {
     [SerializableNode("Selector")]
     public class Selector<TSensory, TAction> : Node<TSensory, TAction>
@@ -27,7 +27,7 @@ namespace BehaviorTree.Nodes
             for (int i = 0; i < children.Count; i++)
             {
                 TAction result = children[i].Tick(input, btInfo);
-                
+
                 // If this child returns a non-default result, use it
                 if (!result.Equals(default(TAction)))
                 {

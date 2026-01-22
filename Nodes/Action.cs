@@ -1,4 +1,4 @@
-namespace BehaviorTree.Nodes
+namespace SimpleUnityBehaviorTree.Nodes
 {
     public abstract class Action<TSensory, TAction> : Node<TSensory, TAction>
         where TSensory : struct

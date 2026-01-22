@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Nodes
+namespace SimpleUnityBehaviorTree.Nodes
 {
     [SerializableNode("Condition")]
     public class Condition<TSensory, TAction> : Node<TSensory, TAction>

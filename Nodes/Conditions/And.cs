@@ -1,7 +1,7 @@
 using System.Linq;
-using BehaviorTree.Serializations;
+using SimpleUnityBehaviorTree.Serializations;
 
-namespace BehaviorTree.Nodes
+namespace SimpleUnityBehaviorTree.Nodes
 {
     [SerializableEvaluator("And")]
     public class And<TSensory> : Logic<TSensory>
