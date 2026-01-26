@@ -7,7 +7,7 @@ namespace SimpleUnityBehaviorTree.Nodes
         public Action(string name)
             : base(name) { }
 
-        public override TAction Tick(TSensory input, BtInformation btInfo)
+        public override (bool, TAction) Tick(TSensory input, BtInformation btInfo)
         {
             // Update action tracking in BtInformation
             if (btInfo.currentActionName != name)
@@ -19,7 +19,9 @@ namespace SimpleUnityBehaviorTree.Nodes
 
             btInfo.currentActionElapsedTime += btInfo.deltaTime;
 
-            return TakeAction(input);
+            TAction action = TakeAction(input);
+            // Action nodes always return true (action executed)
+            return (true, action);
         }
 
         protected abstract TAction TakeAction(TSensory input);

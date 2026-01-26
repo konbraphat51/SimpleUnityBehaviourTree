@@ -7,13 +7,6 @@ namespace SimpleUnityBehaviorTree.Nodes
         where TSensory : struct
         where TAction : struct
     {
-        public enum State
-        {
-            RUNNING,
-            SUCCESS,
-            FAILURE,
-        }
-
         public string name { get; private set; }
         protected List<Node<TSensory, TAction>> _children = new List<Node<TSensory, TAction>>();
         public IReadOnlyList<Node<TSensory, TAction>> children
@@ -26,7 +19,9 @@ namespace SimpleUnityBehaviorTree.Nodes
             this.name = name;
         }
 
-        public abstract TAction Tick(TSensory input, BtInformation btInfo);
+        // Returns (bool success, TAction action)
+        // success: true if action was executed (condition was met)
+        public abstract (bool, TAction) Tick(TSensory input, BtInformation btInfo);
 
         public virtual void Reset()
         {

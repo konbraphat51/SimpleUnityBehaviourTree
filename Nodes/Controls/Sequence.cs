@@ -9,7 +9,8 @@ namespace SimpleUnityBehaviorTree.Nodes
         where TSensory : struct
         where TAction : struct
     {
-        public int childCurrent { get; private set; } = -1;
+        public int childCurrent { get; private set; } = 0;
+        private bool hasExecutedCurrentOnce = false;
 
         [ConstructorParameter("children")]
         public Node<TSensory, TAction>[] childrenArray
@@ -23,69 +24,38 @@ namespace SimpleUnityBehaviorTree.Nodes
             _children = children.ToList();
         }
 
-        public override TAction Tick(TSensory input, BtInformation btInfo)
+        public override (bool, TAction) Tick(TSensory input, BtInformation btInfo)
         {
-            // if starting sequence...
-            if (childCurrent == -1 && children.Count > 0)
+            // if no children, return success
+            if (children.Count == 0)
             {
-                // ... start from the first child
-                childCurrent = 0;
-            }
-            // if no child...
-            else if (children.Count == 0)
-            {
-                // ... just return success
-                return CreateSuccessOutput(input);
+                return (true, default(TAction));
             }
 
-            // tick the current child
-            TAction result = children[childCurrent].Tick(input, btInfo);
+            // Execute current node
+            var (currentSuccess, currentAction) = children[childCurrent].Tick(input, btInfo);
+            hasExecutedCurrentOnce = true;
 
-            // Check the state of the result
-            State resultState = GetStateFromOutput(result);
+            // Check if we should move to next node
+            int nextIndex = (childCurrent + 1) % children.Count;
+            var (nextSuccess, _) = children[nextIndex].Tick(input, btInfo);
 
-            // process by result
-            switch (resultState)
+            // If next node is true and we've executed current at least once, move to next
+            if (nextSuccess && hasExecutedCurrentOnce)
             {
-                case State.SUCCESS:
-                {
-                    // if there are more children...
-                    if (childCurrent + 1 < children.Count)
-                    {
-                        // ... move to the next child
-                        childCurrent++;
-                        return CreateRunningOutput(input);
-                    }
-                    else
-                    {
-                        // ... sequence succeeded
-                        childCurrent = -1;
-                        Reset();
-                        return result;
-                    }
-                }
-                case State.FAILURE:
-                {
-                    // sequence fails immediately
-                    childCurrent = -1;
-                    Reset();
-                    return result;
-                }
-                case State.RUNNING:
-                {
-                    return result;
-                }
-                default:
-                {
-                    throw new NotImplementedException("Unhandled state in NodeSequence");
-                }
+                childCurrent = nextIndex;
+                hasExecutedCurrentOnce = false;
             }
+
+            // Return current node's action
+            return (currentSuccess, currentAction);
         }
 
         public override void Reset()
         {
             base.Reset();
-            childCurrent = -1;
+            childCurrent = 0;
+            hasExecutedCurrentOnce = false;
         }
 
         public void AddChild(Node<TSensory, TAction> child)
@@ -96,26 +66,6 @@ namespace SimpleUnityBehaviorTree.Nodes
         public void RemoveChild(Node<TSensory, TAction> child)
         {
             _children.Remove(child);
-        }
-
-        // Helper methods to create output with state
-        protected virtual TAction CreateSuccessOutput(TSensory input)
-        {
-            // Default implementation - subclasses should override
-            return default(TAction);
-        }
-
-        protected virtual TAction CreateRunningOutput(TSensory input)
-        {
-            // Default implementation - subclasses should override
-            return default(TAction);
-        }
-
-        protected virtual State GetStateFromOutput(TAction output)
-        {
-            // Default implementation - subclasses should override
-            // This assumes TAction has a State field
-            return State.SUCCESS;
         }
     }
 }

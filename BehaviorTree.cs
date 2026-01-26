@@ -38,8 +38,8 @@ namespace SimpleUnityBehaviorTree
             _lastTickTime = currentTime;
 
             BtInformation btInfo = new BtInformation(deltaTime);
-            TAction result = nodeRoot.Tick(input, btInfo);
-            return result;
+            var (success, action) = nodeRoot.Tick(input, btInfo);
+            return action;
         }
     }
 }

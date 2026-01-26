@@ -20,23 +20,23 @@ namespace SimpleUnityBehaviorTree.Nodes
             _children = children.ToList();
         }
 
-        public override TAction Tick(TSensory input, BtInformation btInfo)
+        public override (bool, TAction) Tick(TSensory input, BtInformation btInfo)
         {
-            // try nodes from the beginning of the list in order each tick
-            // execute the first one that returns a non-default result
+            // Try nodes from the beginning in order
+            // Execute the first one that returns true
             for (int i = 0; i < children.Count; i++)
             {
-                TAction result = children[i].Tick(input, btInfo);
+                var (success, action) = children[i].Tick(input, btInfo);
 
-                // If this child returns a non-default result, use it
-                if (!result.Equals(default(TAction)))
+                // If this child succeeds, return its result
+                if (success)
                 {
-                    return result;
+                    return (true, action);
                 }
             }
 
-            // if all children returned default or no children exist
-            return default(TAction);
+            // All children failed
+            return (false, default(TAction));
         }
     }
 }

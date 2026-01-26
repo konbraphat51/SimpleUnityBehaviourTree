@@ -62,11 +62,20 @@ Parameters can be:
 - **Nested Nodes**: Node objects (for child nodes)
 - **Nested Evaluators**: Evaluator objects (for condition evaluators)
 
+## Node Return Values
+
+All nodes return a tuple `(bool, TAction)`:
+- The `bool` indicates success (true if condition was met or action executed, false otherwise)
+- The `TAction` contains the action to be executed
+
 ## Built-in Node Types
 
 ### Sequence
 
-Executes children in order until one fails.
+Executes children in a repeating pattern with special continuation logic:
+- Executes the current child until the next child returns true
+- Always executes the current child at least once per tick, even if the next is already true
+- When reaching the last child, loops back to the first child
 
 ```json
 {
@@ -78,11 +87,16 @@ Executes children in order until one fails.
 ```
 
 **Parameters:**
-- `children` (array of Node): Child nodes to execute in sequence
+- `children` (array of Node): Child nodes to execute in looping sequence
+
+**Behavior:**
+- Maintains state of which child is currently executing
+- Returns the action from the current child
+- Advances to next child only when next child's condition becomes true
 
 ### Selector
 
-Executes children in order until one succeeds.
+Tries children in order until one returns true (succeeds).
 
 ```json
 {
@@ -95,6 +109,11 @@ Executes children in order until one succeeds.
 
 **Parameters:**
 - `children` (array of Node): Child nodes to try in order
+
+**Behavior:**
+- Evaluates children from first to last
+- Returns the first child that returns `(true, action)`
+- If all children return false, returns `(false, default(TAction))`
 
 ### Random
 
@@ -116,27 +135,28 @@ Selects children based on weighted probability.
 
 ### Condition
 
-Branches based on condition evaluation.
+Executes a child node only if the condition evaluator returns true.
 
 ```json
 {
   "type": "Condition",
   "params": {
     "evaluator": <Evaluator>,
-    "childTrue": <Node>,
-    "childFalse": <Node>
+    "childTrue": <Node>
   }
 }
 ```
 
 **Parameters:**
-- `evaluator` (Evaluator): Condition evaluator to determine which branch to take
+- `evaluator` (Evaluator): Condition evaluator to determine if child should execute
 - `childTrue` (Node): Node to execute if evaluator returns true
-- `childFalse` (Node): Node to execute if evaluator returns false
 
-### Action
+**Behavior:**
+- If evaluator returns true: executes and returns result from `childTrue`
+- If evaluator returns false: returns `(false, default(TAction))`
+- Typically used with Selector to try alternatives when condition fails
 
-Base class for custom action nodes. Users define their own action types with custom parameters.
+Action nodes always return `(true, action)` indicating successful execution.
 
 ```json
 {
@@ -146,6 +166,16 @@ Base class for custom action nodes. Users define their own action types with cus
     "<customParam2>": <value2>,
     ...
   }
+}
+```
+
+**Behavior:**
+- Action nodes always return true (first element of tuple)
+- The second element contains the action data structure to be executed ...
+  }
+Evaluators are not nodes - they are helper objects injected into Condition nodes to evaluate boolean conditions.
+They implement `ISerializableBT` and return simple boolean values.
+
 }
 ```
 
@@ -275,12 +305,7 @@ Serialized as:
 ```
 
 ## Complete Example
-
-Here's a complete example showing a nested behavior tree structure:
-
-```json
-{
-  "type": "Sequence",
+lector",
   "params": {
     "children": [
       {
@@ -291,15 +316,10 @@ Here's a complete example showing a nested behavior tree structure:
             "params": {
               "conditions": [
                 {
-                  "type": "Not",
+                  "type": "SampleEvaluator",
                   "params": {
-                    "condition": {
-                      "type": "SampleEvaluator",
-                      "params": {
-                        "p0": 10,
-                        "p1": 1.5
-                      }
-                    }
+                    "p0": 10,
+                    "p1": 1.5
                   }
                 },
                 {
@@ -318,21 +338,14 @@ Here's a complete example showing a nested behavior tree structure:
               "p0": 1,
               "p1": 2.0
             }
-          },
-          "childFalse": {
-            "type": "SampleAction",
-            "params": {
-              "p0": 2,
-              "p1": 3.0
-            }
           }
         }
       },
       {
         "type": "SampleAction",
         "params": {
-          "p0": 0,
-          "p1": 0.0
+          "p0": 2,
+          "p1": 3.0
         }
       }
     ]
@@ -341,6 +354,11 @@ Here's a complete example showing a nested behavior tree structure:
 ```
 
 This represents:
+- A Selector with two children:
+  1. A Condition that evaluates an AND of SampleEvaluator(10, 1.5) AND SampleEvaluator(20, 2.5)
+     - If true: executes SampleAction(1, 2.0)
+     - If false: returns (false, default) and Selector tries next child
+  2. SampleAction(2, 3.0) - executed as fallback if Condition fails
 - A Sequence with two children:
   1. A Condition that evaluates an AND of (NOT SampleEvaluator(10, 1.5)) AND SampleEvaluator(20, 2.5)
      - If true: executes SampleAction(1, 2.0)

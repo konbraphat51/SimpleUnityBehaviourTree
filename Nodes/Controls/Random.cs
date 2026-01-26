@@ -72,10 +72,10 @@ namespace SimpleUnityBehaviorTree.Nodes
             }
         }
 
-        public override TAction Tick(TSensory input, BtInformation btInfo)
+        public override (bool, TAction) Tick(TSensory input, BtInformation btInfo)
         {
             // if not selected yet...
-            TAction result;
+            (bool success, TAction action) result;
             if (nodeSelected == null)
             {
                 result = SelectChildAndTick(input, btInfo);
@@ -85,13 +85,9 @@ namespace SimpleUnityBehaviorTree.Nodes
                 result = nodeSelected.Tick(input, btInfo);
             }
 
-            // Check the state of the result
-            State resultState = GetStateFromOutput(result);
-
-            // if finished...
-            if (resultState != State.RUNNING)
+            // if failed, reset to try again next tick
+            if (!result.success)
             {
-                // reset when done
                 Reset();
             }
 
@@ -134,33 +130,32 @@ namespace SimpleUnityBehaviorTree.Nodes
             }
         }
 
-        protected TAction SelectChildAndTick(TSensory input, BtInformation btInfo)
+        protected (bool, TAction) SelectChildAndTick(TSensory input, BtInformation btInfo)
         {
             Node<TSensory, TAction>[] shuffledChildren = ShuffleChildrenByWeights();
             foreach (Node<TSensory, TAction> child in shuffledChildren)
             {
                 // try next child
-                TAction result = child.Tick(input, btInfo);
-                State resultState = GetStateFromOutput(result);
+                var (success, action) = child.Tick(input, btInfo);
 
-                // if not failed...
-                if (resultState != State.FAILURE)
+                // if succeeded...
+                if (success)
                 {
                     // ... select this child
                     nodeSelected = child;
-                    return result;
+                    return (true, action);
                 }
 
                 // select next node if failed
             }
 
             // all children failed
-            return CreateFailureOutput(input);
+            return (false, default(TAction));
         }
 
         protected Node<TSensory, TAction>[] ShuffleChildrenByWeights()
         {
-            Random random = new Random();
+            System.Random random = new System.Random();
             List<Node<TSensory, TAction>> shuffled = new List<Node<TSensory, TAction>>();
             List<Node<TSensory, TAction>> childrenCopy = new List<Node<TSensory, TAction>>(
                 _children
@@ -191,23 +186,9 @@ namespace SimpleUnityBehaviorTree.Nodes
             return shuffled.ToArray();
         }
 
-        private float ComputeRandom(float totalWeight, Random rand)
+        private float ComputeRandom(float totalWeight, System.Random rand)
         {
             return (float)(rand.NextDouble() * totalWeight);
-        }
-
-        // Helper methods to create output with state
-        protected virtual TAction CreateFailureOutput(TSensory input)
-        {
-            // Default implementation - subclasses should override
-            return default(TAction);
-        }
-
-        protected virtual State GetStateFromOutput(TAction output)
-        {
-            // Default implementation - subclasses should override
-            // This assumes TAction has a State field
-            return State.SUCCESS;
         }
     }
 }
