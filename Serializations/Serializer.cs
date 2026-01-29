@@ -162,6 +162,13 @@ namespace SimpleUnityBehaviorTree.Serializations
 
         private static void WriteSingleValue(JsonWriter writer, object value, string objectName)
         {
+            // Handle null values
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
+
             switch (value.GetType())
             {
                 case Type t when typeof(Node<TSensory, TAction>).IsAssignableFrom(t):
