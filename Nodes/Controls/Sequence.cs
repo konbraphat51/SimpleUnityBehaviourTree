@@ -37,7 +37,8 @@ namespace SimpleUnityBehaviorTree.Nodes
             hasExecutedCurrentOnce = true;
 
             // Check if we should move to next node
-            int nextIndex = (childCurrent + 1) % children.Count;
+            // repeat the last node if at the end
+            int nextIndex = Math.Min(childCurrent + 1, children.Count - 1);
             var (nextSuccess, _) = children[nextIndex].Tick(input, btInfo);
 
             // If next node is true and we've executed current at least once, move to next
