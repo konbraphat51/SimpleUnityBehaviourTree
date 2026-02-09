@@ -18,10 +18,14 @@ namespace SimpleUnityBehaviorTree.Nodes
             get { return _children.ToArray(); }
         }
 
-        public Sequence(Node<TSensory, TAction>[] children)
+        [ConstructorParameter("repeat")]
+        public bool repeat { get; private set; }
+
+        public Sequence(Node<TSensory, TAction>[] children, bool repeat = false)
             : base("Sequence")
         {
             _children = children.ToList();
+            this.repeat = repeat;
         }
 
         public override (bool, TAction) Tick(TSensory input, BtInformation btInfo)
@@ -37,8 +41,17 @@ namespace SimpleUnityBehaviorTree.Nodes
             hasExecutedCurrentOnce = true;
 
             // Check if we should move to next node
-            // repeat the last node if at the end
-            int nextIndex = Math.Min(childCurrent + 1, children.Count - 1);
+            int nextIndex;
+            if (repeat)
+            {
+                // Loop back to first node after last one
+                nextIndex = (childCurrent + 1) % children.Count;
+            }
+            else
+            {
+                // Repeat the last node if at the end
+                nextIndex = Math.Min(childCurrent + 1, children.Count - 1);
+            }
             var (nextSuccess, _) = children[nextIndex].Tick(input, btInfo);
 
             // If next node is true and we've executed current at least once, move to next

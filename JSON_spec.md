@@ -75,24 +75,29 @@ All nodes return a tuple `(bool, TAction)`:
 Executes children in a repeating pattern with special continuation logic:
 - Executes the current child until the next child returns true
 - Always executes the current child at least once per tick, even if the next is already true
-- When reaching the last child, loops back to the first child
+- When reaching the last child, behavior depends on the `repeat` parameter
 
 ```json
 {
   "type": "Sequence",
   "params": {
-    "children": [<Node>, <Node>, ...]
+    "children": [<Node>, <Node>, ...],
+    "repeat": <boolean>
   }
 }
 ```
 
 **Parameters:**
-- `children` (array of Node): Child nodes to execute in looping sequence
+- `children` (array of Node): Child nodes to execute in sequence
+- `repeat` (boolean, optional, default: false): If true, loops back to the first child when the last child completes. If false, keeps repeating the last child.
 
 **Behavior:**
 - Maintains state of which child is currently executing
 - Returns the action from the current child
 - Advances to next child only when next child's condition becomes true
+- When reaching the last child:
+  - If `repeat` is true: loops back to the first child
+  - If `repeat` is false: keeps executing the last child
 
 ### Selector
 
