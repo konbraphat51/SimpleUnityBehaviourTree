@@ -22,31 +22,31 @@ namespace SimpleUnityBehaviorTree.Nodes
             _children = children.ToList();
         }
 
-        public override (bool, TAction) Tick(TSensory input, BtInformation btInfo)
+        public override TAction Tick(TSensory input, BtInformation btInfo)
         {
             // Try nodes from the beginning in order
-            // Execute the first one that returns true
-            for (int i = 0; i < children.Count; i++)
+            // Execute the first one that can run
+            for (int cnt = 0; cnt < children.Count; cnt++)
             {
-                var (success, action) = children[i].Tick(input, btInfo);
-
-                // If this child succeeds, return its result
-                if (success)
+                // Check if this child can run
+                if (children[cnt].CanRun(input, btInfo))
                 {
                     // If the selected node is different from the last one, reset the last node
-                    if (_lastSelectedNodeIndex != -1 && _lastSelectedNodeIndex != i)
+                    if (_lastSelectedNodeIndex != -1 && _lastSelectedNodeIndex != cnt)
                     {
                         children[_lastSelectedNodeIndex].Reset();
                     }
 
                     // Update the last selected node index
-                    _lastSelectedNodeIndex = i;
+                    _lastSelectedNodeIndex = cnt;
 
-                    return (true, action);
+                    // Execute this child and return its action
+                    TAction action = children[cnt].Tick(input, btInfo);
+                    return action;
                 }
             }
 
-            // All children failed
+            // All children failed to run
             // Reset the last selected node if there was one
             if (_lastSelectedNodeIndex != -1)
             {
@@ -54,7 +54,7 @@ namespace SimpleUnityBehaviorTree.Nodes
                 _lastSelectedNodeIndex = -1;
             }
 
-            return (false, default(TAction));
+            return default(TAction);
         }
 
         public override bool CanRun(TSensory input, BtInformation btInfo)

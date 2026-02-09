@@ -28,16 +28,16 @@ namespace SimpleUnityBehaviorTree.Nodes
             this.repeat = repeat;
         }
 
-        public override (bool, TAction) Tick(TSensory input, BtInformation btInfo)
+        public override TAction Tick(TSensory input, BtInformation btInfo)
         {
-            // if no children, return success
+            // if no children, return default
             if (children.Count == 0)
             {
-                return (true, default(TAction));
+                return default(TAction);
             }
 
             // Execute current node
-            var (currentSuccess, currentAction) = children[childCurrent].Tick(input, btInfo);
+            TAction currentAction = children[childCurrent].Tick(input, btInfo);
             hasExecutedCurrentOnce = true;
 
             // Check if we should move to next node
@@ -52,17 +52,16 @@ namespace SimpleUnityBehaviorTree.Nodes
                 // Repeat the last node if at the end
                 nextIndex = Math.Min(childCurrent + 1, children.Count - 1);
             }
-            var (nextSuccess, _) = children[nextIndex].Tick(input, btInfo);
 
-            // If next node is true and we've executed current at least once, move to next
-            if (nextSuccess && hasExecutedCurrentOnce)
+            // If next node can run and we've executed current at least once, move to next
+            if (children[nextIndex].CanRun(input, btInfo) && hasExecutedCurrentOnce)
             {
                 childCurrent = nextIndex;
                 hasExecutedCurrentOnce = false;
             }
 
             // Return current node's action
-            return (currentSuccess, currentAction);
+            return currentAction;
         }
 
         public override bool CanRun(TSensory input, BtInformation btInfo)

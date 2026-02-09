@@ -31,21 +31,9 @@ namespace SimpleUnityBehaviorTree.Nodes
             this.childTrue = childTrue;
         }
 
-        public override (bool, TAction) Tick(TSensory input, BtInformation btInfo)
+        public override TAction Tick(TSensory input, BtInformation btInfo)
         {
-            // Evaluate condition
-            bool evaluation = evaluator.Evaluate(input, btInfo);
-
-            if (evaluation)
-            {
-                // Condition true: execute child
-                return childTrue.Tick(input, btInfo);
-            }
-            else
-            {
-                // Condition false: return false with default action
-                return (false, default(TAction));
-            }
+            return childTrue.Tick(input, btInfo);
         }
 
         public override bool CanRun(TSensory input, BtInformation btInfo)
