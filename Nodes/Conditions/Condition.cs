@@ -48,6 +48,12 @@ namespace SimpleUnityBehaviorTree.Nodes
             }
         }
 
+        public override bool CanRun(TSensory input, BtInformation btInfo)
+        {
+            // Can run if the condition evaluates to true
+            return evaluator.Evaluate(input, btInfo);
+        }
+
         public override void Reset()
         {
             base.Reset();

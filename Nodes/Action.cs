@@ -24,6 +24,12 @@ namespace SimpleUnityBehaviorTree.Nodes
             return (true, action);
         }
 
+        public override bool CanRun(TSensory input, BtInformation btInfo)
+        {
+            // Action nodes can always run
+            return true;
+        }
+
         protected abstract TAction TakeAction(TSensory input);
     }
 }

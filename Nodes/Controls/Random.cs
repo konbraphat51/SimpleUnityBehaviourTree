@@ -94,6 +94,11 @@ namespace SimpleUnityBehaviorTree.Nodes
             return result;
         }
 
+        public override bool CanRun(TSensory input, BtInformation btInfo)
+        {
+            return true;
+        }
+
         public override void Reset()
         {
             base.Reset();

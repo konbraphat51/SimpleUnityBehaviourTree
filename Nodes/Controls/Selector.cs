@@ -56,5 +56,11 @@ namespace SimpleUnityBehaviorTree.Nodes
 
             return (false, default(TAction));
         }
+
+        public override bool CanRun(TSensory input, BtInformation btInfo)
+        {
+            // Selector can always run
+            return true;
+        }
     }
 }

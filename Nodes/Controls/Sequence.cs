@@ -65,6 +65,12 @@ namespace SimpleUnityBehaviorTree.Nodes
             return (currentSuccess, currentAction);
         }
 
+        public override bool CanRun(TSensory input, BtInformation btInfo)
+        {
+            // Sequence can always run
+            return true;
+        }
+
         public override void Reset()
         {
             base.Reset();

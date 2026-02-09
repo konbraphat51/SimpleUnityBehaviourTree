@@ -22,6 +22,7 @@ namespace SimpleUnityBehaviorTree.Nodes
         // Returns (bool success, TAction action)
         // success: true if action was executed (condition was met)
         public abstract (bool, TAction) Tick(TSensory input, BtInformation btInfo);
+        public abstract bool CanRun(TSensory input, BtInformation btInfo);
 
         public virtual void Reset()
         {
