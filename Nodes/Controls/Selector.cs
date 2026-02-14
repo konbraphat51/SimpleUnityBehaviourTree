@@ -59,8 +59,8 @@ namespace SimpleUnityBehaviorTree.Nodes
 
         public override bool CanRun(TSensory input, BtInformation btInfo)
         {
-            // Selector can always run
-            return true;
+            // Return true only if at least one child can run
+            return children.Any(child => child.CanRun(input, btInfo));
         }
     }
 }
